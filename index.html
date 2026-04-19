@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>House of Cards Luxe Generator</title>
+  <style>
+    :root{
+      --bg:#070709;
+      --panel:#111116;
+      --panel-2:#17171f;
+      --ink:#f6f2eb;
+      --muted:#b9a98f;
+      --gold:#F59E0B;
+      --red:#4F46E5;
+      --red-2:#6366F1;
+      --line:rgba(245,158,11,.22);
+      --shadow:0 18px 48px rgba(0,0,0,.45);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:radial-gradient(circle at top,#0d0a2e 0%, #0b0b10 35%, #060608 100%);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100%}
+    body{overflow-x:hidden}
+    .floating-bg{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+    .float-card,.float-suit{position:absolute;opacity:.09;filter:drop-shadow(0 0 18px rgba(245,158,11,.25));animation:drift linear infinite}
+    .float-card{font-size:56px;color:#fff;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px 14px;backdrop-filter:blur(2px)}
+    .float-suit{font-size:44px;color:var(--gold)}
+    @keyframes drift{from{transform:translateY(105vh) rotate(0deg)}to{transform:translateY(-20vh) rotate(360deg)}}
+
+    .wrap{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:24px 16px 60px}
+    .hero{position:relative;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));box-shadow:var(--shadow);border-radius:30px;padding:28px 22px 22px;overflow:hidden}
+    .hero::before,.hero::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;filter:blur(45px);opacity:.24}
+    .hero::before{background:#4F46E5;top:-80px;left:-40px}
+    .hero::after{background:#F59E0B;bottom:-80px;right:-40px}
+    h1{margin:0;font-size:clamp(2rem,4vw,4.25rem);line-height:.95;text-transform:uppercase;letter-spacing:.06em;font-weight:900;text-align:center;text-shadow:0 0 24px rgba(245,158,11,.22)}
+    .sub{margin:12px auto 0;max-width:900px;text-align:center;color:#e7dccb;font-size:1rem}
+    .brandline{margin-top:14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);white-space:nowrap;overflow:hidden;background:rgba(0,0,0,.22)}
+    .marquee{display:inline-block;padding:10px 0;animation:marquee 22s linear infinite;color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+    .layout{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin-top:18px}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));border:1px solid var(--line);box-shadow:var(--shadow);border-radius:var(--radius)}
+    .panel-pad{padding:18px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px;font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:800}
+    .tiny{font-size:.8rem;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .field{display:flex;flex-direction:column;gap:8px}
+    label{font-size:.82rem;font-weight:700;color:#f2e7d7;text-transform:uppercase;letter-spacing:.06em}
+    select,input[type="text"],textarea{width:100%;background:#0d0d12;color:var(--ink);border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:12px 14px;font-size:.95rem;outline:none}
+    textarea{min-height:110px;resize:vertical}
+    select:focus,input:focus,textarea:focus{border-color:rgba(245,158,11,.62);box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    .chip{border:1px solid rgba(245,158,11,.25);background:#111117;color:#f5eee3;padding:10px 12px;border-radius:999px;font-size:.84rem;font-weight:700;cursor:pointer;transition:.18s}
+    .chip:hover{transform:translateY(-1px);border-color:rgba(245,158,11,.5)}
+    .chip.active{background:linear-gradient(180deg,#FBBF24,#B45309);color:#16110a;border-color:transparent;box-shadow:0 10px 24px rgba(245,158,11,.25)}
+
+    .preset-wrap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-height:260px;overflow:auto;padding-right:4px}
+    .preset{padding:10px 12px;border-radius:14px;border:1px solid rgba(245,158,11,.18);background:#0d0d12;cursor:pointer;font-size:.84rem;color:#f6efe6;text-align:left;transition:.18s}
+    .preset:hover{transform:translateY(-1px);border-color:rgba(245,158,11,.5)}
+    .preset.active{background:linear-gradient(180deg,rgba(99,102,241,.9),rgba(55,48,163,.95));border-color:rgba(255,255,255,.12)}
+
+    .btnbar{display:flex;flex-wrap:wrap;gap:10px}
+    .btn{appearance:none;border:none;border-radius:14px;padding:12px 16px;font-weight:800;letter-spacing:.03em;cursor:pointer;transition:.18s;box-shadow:var(--shadow)}
+    .btn:hover{transform:translateY(-1px)}
+    .btn.gold{background:linear-gradient(180deg,#FBBF24,#B45309);color:#150f08}
+    .btn.red{background:linear-gradient(180deg,#6366F1,#3730A3);color:#fff}
+    .btn.dark{background:#15151c;color:#fff;border:1px solid rgba(245,158,11,.2);box-shadow:none}
+    .btn.ghost{background:transparent;color:var(--ink);border:1px solid rgba(245,158,11,.2);box-shadow:none}
+
+    .output{min-height:260px;background:#08080d;border:1px solid rgba(245,158,11,.16);border-radius:18px;padding:16px;white-space:pre-wrap;line-height:1.55;font-size:.97rem}
+    .history{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+    .history-item{background:#0d0d12;border:1px solid rgba(245,158,11,.16);border-radius:14px;padding:12px}
+    .history-item small{display:block;color:var(--muted);margin-bottom:6px}
+
+    .toggle-box{display:flex;gap:8px;flex-wrap:wrap}
+    .mini{padding:10px 12px;background:#0d0d12;border:1px solid rgba(245,158,11,.18);border-radius:12px;color:#f5eee3;font-weight:700;cursor:pointer}
+    .mini.active{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.55)}
+
+    .foot{margin-top:18px;text-align:center;color:#d8c6ad;font-size:.85rem}
+    .upload-note{font-size:.82rem;color:var(--muted)}
+
+    .phase-note{margin:0 0 14px;padding:12px 14px;border:1px solid rgba(245,158,11,.16);border-radius:14px;background:rgba(245,158,11,.06);color:#f3e7d3;line-height:1.45}
+    .subpanel{background:#0d0d12;border:1px solid rgba(245,158,11,.16);border-radius:16px;padding:14px}
+    .status-box{min-height:160px;background:#08080d;border:1px solid rgba(245,158,11,.16);border-radius:16px;padding:14px;white-space:pre-wrap;line-height:1.5}
+
+
+    .helper-list{margin:0;padding-left:18px;color:#eadfcf;line-height:1.55}
+    .helper-list li{margin:4px 0}
+    .workflow-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .workflow-grid .btn{width:100%}
+    .note-card{background:#0d0d12;border:1px solid rgba(245,158,11,.16);border-radius:16px;padding:14px}
+
+
+    .range-row{display:flex;align-items:center;gap:10px}
+    .range-row input[type="range"]{flex:1}
+    .range-value{min-width:36px;text-align:right;color:var(--gold);font-weight:800}
+    .mini-chip-group{display:flex;flex-wrap:wrap;gap:8px}
+    .mini-chip{border:1px solid rgba(245,158,11,.22);background:#111117;color:#f5eee3;padding:9px 11px;border-radius:999px;font-size:.8rem;font-weight:700;cursor:pointer}
+    .mini-chip.active{background:linear-gradient(180deg,#FBBF24,#B45309);color:#16110a;border-color:transparent}
+    .stack-out{display:flex;flex-direction:column;gap:12px}
+    .small-output{min-height:120px;background:#08080d;border:1px solid rgba(245,158,11,.16);border-radius:16px;padding:14px;white-space:pre-wrap;line-height:1.5;font-size:.93rem}
+
+    @media (max-width:1100px){
+      .layout{grid-template-columns:1fr}
+      .preset-wrap{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    @media (max-width:720px){
+      .grid,.grid-3{grid-template-columns:1fr}
+      .preset-wrap{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .wrap{padding:14px 12px 50px}
+    }
+  
+    .self-glow-box{position:relative;overflow:hidden}
+    .self-glow-box.glow-on,.history.history-glow .history-item{box-shadow:0 0 0 1px rgba(245,158,11,.26),0 0 22px rgba(245,158,11,.16),0 0 50px rgba(79,70,229,.28);border-color:rgba(245,158,11,.38)}
+    .self-glow-box.glow-on::after{content:"";position:absolute;inset:-35%;background:radial-gradient(circle at center,rgba(245,158,11,.18),transparent 48%);animation:selfGlowPulse 4.2s ease-in-out infinite;pointer-events:none}
+    .history-controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .history-item{position:relative}
+    .history-item.glow-item::before{content:"";position:absolute;inset:0;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(245,158,11,.18),0 0 18px rgba(245,158,11,.12);pointer-events:none}
+    .history-item .history-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .history-item .history-actions button{padding:8px 10px;border-radius:10px;border:1px solid rgba(245,158,11,.18);background:#101018;color:#f5eee3;font-size:.75rem;font-weight:800;cursor:pointer}
+    .scroll-fabs{position:fixed;right:18px;bottom:22px;z-index:9999;display:flex;flex-direction:column;gap:10px}
+    .scroll-fab{width:52px;height:52px;border-radius:999px;border:1px solid rgba(245,158,11,.42);background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.18),rgba(245,158,11,.12) 35%,rgba(11,12,20,.96) 78%);color:#f5eee3;box-shadow:0 0 0 1px rgba(245,158,11,.12),0 0 20px rgba(245,158,11,.28),0 0 44px rgba(79,70,229,.32);font-size:1.1rem;font-weight:900;cursor:pointer;transition:transform .2s ease,opacity .2s ease, box-shadow .2s ease;backdrop-filter:blur(8px)}
+    .scroll-fab:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 0 0 1px rgba(245,158,11,.22),0 0 26px rgba(245,158,11,.42),0 0 58px rgba(79,70,229,.38)}
+    .scroll-fab.hidden{opacity:0;pointer-events:none;transform:translateY(10px)}
+    .scroll-fab span{display:block;filter:drop-shadow(0 0 10px rgba(245,158,11,.45))}
+    @keyframes selfGlowPulse{0%,100%{transform:scale(.96);opacity:.55}50%{transform:scale(1.08);opacity:1}}
+
+  </style>
+</head>
+<body>
+  <div class="floating-bg" id="floatingBg"></div>
+  <div class="wrap">
+    <section class="hero panel">
+      <h1>House of Cards Luxe Generator</h1>
+      <p class="sub">Luxury playing-card fantasy prompts with royal breakout drama, casino glamour, gothic elegance, surreal suit symbolism, and high-end editorial energy.</p>
+      <div class="brandline"><div class="marquee">♠️ House of Cards Luxe • Royal Breakout Fantasy • Editorial Card Glam • Casino Luxe Nights • Wonderland Hearts • Crystal Luxe • Gothic Queen Energy • ♣️ ♥️ ♦️ House of Cards Luxe • Royal Breakout Fantasy • Editorial Card Glam • Casino Luxe Nights • Wonderland Hearts • Crystal Luxe • Gothic Queen Energy • </div></div>
+    </section>
+
+    <div class="layout">
+      <div class="panel panel-pad">
+        <h2 class="section-title">Presets <span class="tiny">100 ready-to-use vibes</span></h2>
+        <div class="preset-wrap" id="presetWrap"></div>
+
+        <div class="btnbar" style="margin-top:16px">
+          <button class="btn gold" id="generateBtn">Generate Prompt</button>
+          <button class="btn red" id="randomBtn">Randomize</button>
+          <button class="btn dark" id="clearBtn">Clear All</button>
+          <button class="btn ghost" id="copyBtn">Copy Prompt</button>
+          <button class="btn ghost" id="saveBtn">Save Prompt</button>
+        </div>
+
+      </div>
+      <div class="panel panel-pad">
+        <h2 class="section-title">Style Locks <span class="tiny">click to stack or isolate a vibe</span></h2>
+        <div class="chips" id="styleLocks"></div>
+        <div style="margin-top:14px" class="btnbar">
+          <button class="btn dark" id="clearLocksBtn">Clear Locks</button>
+        </div>
+        <div style="margin-top:16px">
+          <h2 class="section-title">Reference Photo Buttons</h2>
+          <div class="toggle-box">
+            <label class="mini"><input type="file" id="refUpload" accept="image/*" style="display:none">Upload Reference</label>
+            <button class="mini" type="button" id="toggleRefBtn">Reference Off</button>
+          </div>
+          <div class="upload-note" id="refStatus" style="margin-top:10px">No reference image attached.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout" style="margin-top:18px">
+    <div class="layout" style="margin-top:18px">
+      <div class="panel panel-pad">
+        <h2 class="section-title">Phase 2 — Style Carryover <span class="tiny">lock a look and expand the deck in that same family</span></h2>
+        <div class="phase-note"><strong>Addition-only Phase 2:</strong> Lock Current Deck Style, Build Full Deck From This Look, preset-to-deck carryover, random-to-deck carryover, Deck Consistency Lock, and Style Snapshot Save. Nothing from the existing generator was removed or replaced.</div>
+        <div class="grid">
+          <div class="subpanel">
+            <div class="field">
+              <label for="snapshotName">Style snapshot name</label>
+              <input type="text" id="snapshotName" placeholder="Example: Wonderland Hearts Deck" />
+            </div>
+            <div class="btnbar" style="margin-top:12px">
+              <button class="btn gold" id="lockStyleBtn">Lock Current Deck Style</button>
+              <button class="btn dark" id="saveStyleBtn">Save Style Snapshot</button>
+            </div>
+            <div class="btnbar" style="margin-top:10px">
+              <button class="btn ghost" id="deckConsistencyBtn">Deck Consistency Off</button>
+            </div>
+          </div>
+          <div class="subpanel">
+            <div class="grid-3">
+              <div class="field">
+                <label for="targetRank">Target rank</label>
+                <select id="targetRank"><option value="none">none</option><option value="ace">ace</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="jack">jack</option><option value="queen">queen</option><option value="king">king</option><option value="joker">joker</option></select>
+              </div>
+              <div class="field">
+                <label for="targetSuit">Target suit</label>
+                <select id="targetSuit"><option value="none">none</option><option value="hearts">hearts</option><option value="spades">spades</option><option value="diamonds">diamonds</option><option value="clubs">clubs</option></select>
+              </div>
+              <div class="field">
+                <label for="targetDeckMode">Target deck mode</label>
+                <select id="targetDeckMode"><option value="none">none</option><option value="single featured card">single featured card</option><option value="full deck builder">full deck builder</option><option value="single suit builder">single suit builder</option><option value="court card builder">court card builder</option><option value="number card run">number card run</option><option value="joker builder">joker builder</option></select>
+              </div>
+            </div>
+            <div class="btnbar" style="margin-top:12px">
+              <button class="btn red" id="applyLockedStyleBtn">Apply Locked Style</button>
+              <button class="btn gold" id="generateLockedStyleBtn">Generate Locked-Style Prompt</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel panel-pad">
+        <h2 class="section-title">Locked Style Snapshot <span class="tiny">preset and random carryover lives here</span></h2>
+        <div class="status-box" id="styleSnapshotStatus">No locked style yet.
+Lock a preset, random result, or manual build you love, then use it across the rest of the deck.</div>
+        <div class="field" style="margin-top:14px">
+          <label for="savedStyles">Saved style snapshots</label>
+          <select id="savedStyles"><option value="">No saved snapshots yet</option></select>
+        </div>
+        <div class="btnbar" style="margin-top:12px">
+          <button class="btn dark" id="loadStyleBtn">Load Saved Snapshot</button>
+          <button class="btn ghost" id="deleteStyleBtn">Delete Saved Snapshot</button>
+        </div>
+      </div>
+    </div>
+
+
+
+      <div class="panel panel-pad">
+        <h2 class="section-title">Phase 3 — Workflow + Polish <span class="tiny">workflow buttons, mobile photo guidance, reference behavior, and safer carryover tools</span></h2>
+        <div class="phase-note"><strong>Addition-only Phase 3:</strong> Deck workflow buttons, phone upload guidance, reference behavior options, duo-role polish, decorative-card control, and cleaner locked-style prompt assembly. Nothing from the existing generator was removed or replaced.</div>
+        <div class="grid">
+          <div class="subpanel">
+            <h3 class="section-title" style="font-size:.92rem;margin-bottom:10px">Deck Workflow Buttons</h3>
+            <div class="workflow-grid">
+              <button class="btn gold" id="nextRankBtn">Generate Next Rank</button>
+              <button class="btn dark" id="sameStyleDifferentSuitBtn">Same Style, Different Suit</button>
+              <button class="btn dark" id="courtCardsBtn">Generate Court Cards</button>
+              <button class="btn dark" id="numberCardsBtn">Generate Number Cards</button>
+              <button class="btn red" id="jokerThisStyleBtn">Generate Joker in This Style</button>
+              <button class="btn ghost" id="fullSuitThisStyleBtn">Generate Full Suit in This Style</button>
+            </div>
+            <div class="upload-note" style="margin-top:10px">These buttons add faster deck-building moves without replacing your current workflow.</div>
+          </div>
+          <div class="subpanel">
+            <h3 class="section-title" style="font-size:.92rem;margin-bottom:10px">Reference Photo Behavior</h3>
+            <div class="field">
+              <label for="refBehavior">Reference behavior</label>
+              <select id="refBehavior">
+                <option value="none">none</option>
+                <option value="preserve face only">preserve face only</option>
+                <option value="preserve face and hairstyle">preserve face and hairstyle</option>
+                <option value="preserve face and body type">preserve face and body type</option>
+                <option value="preserve full likeness">preserve full likeness</option>
+                <option value="use photo as inspiration only">use photo as inspiration only</option>
+              </select>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label for="duoRole">Duo role polish</label>
+              <select id="duoRole">
+                <option value="none">none</option>
+                <option value="mirrored same-character duo">mirrored same-character duo</option>
+                <option value="king and queen contrast duo">king and queen contrast duo</option>
+                <option value="masculine pair duo">masculine pair duo</option>
+                <option value="feminine pair duo">feminine pair duo</option>
+                <option value="contrast fashion duo">contrast fashion duo</option>
+              </select>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label for="cardDensity">Decorative card density</label>
+              <select id="cardDensity">
+                <option value="none">none</option>
+                <option value="minimal decorative cards">minimal decorative cards</option>
+                <option value="balanced decorative cards">balanced decorative cards</option>
+                <option value="maximal card fantasy">maximal card fantasy</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="grid" style="margin-top:14px">
+          <div class="note-card">
+            <h3 class="section-title" style="font-size:.92rem;margin-bottom:10px">Phone Upload Guidance</h3>
+            <ul class="helper-list">
+              <li>Use the original phone photo when possible, not a screenshot.</li>
+              <li>Clear lighting beats heavy filters every time.</li>
+              <li>One person in frame works best for likeness locking.</li>
+              <li>Use a full-body photo only when you want body-type carryover.</li>
+              <li>Front-facing portraits are best for face matching.</li>
+            </ul>
+          </div>
+          <div class="note-card">
+            <h3 class="section-title" style="font-size:.92rem;margin-bottom:10px">Workflow Note</h3>
+            <ul class="helper-list">
+              <li>Pick a preset or hit random.</li>
+              <li>Lock the deck style when you love the look.</li>
+              <li>Use the workflow buttons to expand the rest of the deck in that same family.</li>
+              <li>Turn Deck Consistency on when you want the deck to stay visually tight.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-pad">
+        <h2 class="section-title">Card Purity Mode <span class="tiny">lock the selected card as the only primary card identity</span></h2>
+        <div class="phase-note"><strong>Addition-only Card Purity:</strong> locks the prompt so the selected rank + suit stays the only primary playable-card identity in the image. Nothing from the existing generator was removed or replaced.</div>
+        <div class="grid">
+          <div class="subpanel">
+            <div class="field">
+              <label for="cardPurity">Card Purity Mode</label>
+              <select id="cardPurity">
+                <option value="clean main card only" selected>Clean Main Card Only</option>
+                <option value="main card + decorative suits">Main Card + Decorative Suits</option>
+                <option value="main card + support cards">Main Card + Support Cards</option>
+              </select>
+            </div>
+            <div class="upload-note" style="margin-top:10px">Default is Clean Main Card Only. Switch to Decorative Suits if you want suit motifs in the background, or Support Cards if you want matched-suit support cards.</div>
+          </div>
+          <div class="note-card">
+            <h3 class="section-title" style="font-size:.92rem;margin-bottom:10px">How Card Purity works</h3>
+            <ul class="helper-list">
+              <li><strong>Clean Main Card Only:</strong> no held cards, no inset mini-cards, no alternate rank or suit cards, no prop cards with different labels.</li>
+              <li><strong>Main Card + Decorative Suits:</strong> decorative suit symbols and background motifs are allowed, but no second printed playing card.</li>
+              <li><strong>Main Card + Support Cards:</strong> support cards allowed only if they match the selected suit and stay visually secondary.</li>
+              <li>Duo mode always keeps both main cards on the same selected rank + suit.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-pad">
+        <h2 class="section-title">Generator Controls</h2>
+        <div class="phase-note"><strong>Phase 1 — Deck Foundation added:</strong> Deck Mode, Card Type, full 2–10 support, Joker controls, and stricter printed card enforcement. Nothing from the original generator was removed.</div>
+        <div class="grid" id="controlsGrid"></div>
+        <div class="field" style="margin-top:14px">
+          <label for="customConcept">Custom concept / override</label>
+          <textarea id="customConcept" placeholder="Add any custom direction here. Example: plus-size editorial queen, full-body only, giant ace portal, cinematic smoke, preserve facial features..."></textarea>
+        </div>
+      </div>
+
+      <div class="panel panel-pad">
+        <h2 class="section-title">Generated Prompt</h2>
+        <div class="output" id="output">Your generated prompt will land here.</div>
+        <div class="btnbar" style="margin-top:12px">
+          <button class="btn dark" id="promptGlowBtn">Self Glow Off</button>
+          <button class="btn ghost" id="copyLatestHistoryBtn">Copy Latest Saved</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout" style="margin-top:18px">
+      <div class="panel panel-pad">
+        <h2 class="section-title">Prompt History</h2>
+        <div class="history" id="history"></div>
+        <div class="history-controls">
+          <button class="btn dark" id="historyGlowBtn">History Glow Off</button>
+          <button class="btn ghost" id="clearHistoryBtn">Clear History</button>
+        </div>
+      </div>
+      <div class="panel panel-pad">
+        <h2 class="section-title">Notes</h2>
+        <div class="output" style="min-height:220px">• First option in every dropdown is “none.”
+• Randomize respects gender logic and tries to stay on-theme with style locks.
+• Presets load a strong concept title and matching style locks so you can tweak from there.
+• Ethnicity is intentionally included in the prompt wording for facial consistency and skin-tone rendering.
+• Phase 1 deck foundation adds Deck Mode, Card Type, 2–10 support, Joker controls, and stricter printed card enforcement.
+• Built-in negative quality lock stays attached to every final prompt.
+• all rights reserved by glamorousgrammyglowup</div>
+      </div>
+    </div>
+
+    <div class="layout" style="margin-top:18px">
+      <div class="panel panel-pad">
+        <h2 class="section-title">Animated Video Script <span class="tiny">tied to the current card or locked deck style</span></h2>
+        <div class="phase-note"><strong>Addition-only restore:</strong> 8-second animated video script plus motion-only prompt. No voiceover.</div>
+        <div class="btnbar" style="margin-bottom:12px">
+          <button class="btn gold" id="generateVideoBtn">Generate Video Script</button>
+          <button class="btn ghost" id="copyVideoScriptBtn">Copy Video Script</button>
+          <button class="btn ghost" id="copyMotionOnlyBtn">Copy Motion Prompt</button>
+        </div>
+        <div class="stack-out">
+          <div>
+            <div class="tiny" style="margin-bottom:6px">8-second animated video script</div>
+            <div class="small-output" id="videoScriptOutput">Generate a main prompt first, then build the animated script here.</div>
+          </div>
+          <div>
+            <div class="tiny" style="margin-bottom:6px">Motion-only prompt</div>
+            <div class="small-output" id="motionOnlyOutput">Motion prompt will land here.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-pad">
+        <h2 class="section-title">Music / Suno <span class="tiny">deck-style aware music prompts and lyrics</span></h2>
+        <div class="phase-note"><strong>Addition-only restore:</strong> jingle, 30-second song, 1-minute song, lyrics, and instrumental prompt tied to the current card or locked deck family.</div>
+        <div class="grid">
+          <div class="subpanel">
+            <div class="field">
+              <label>Genre chips</label>
+              <div class="mini-chip-group" id="genreChips"></div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Style influence chips</label>
+              <div class="mini-chip-group" id="musicStyleChips"></div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Weirdness</label>
+              <div class="range-row"><input type="range" min="0" max="100" value="35" id="weirdnessRange"><span class="range-value" id="weirdnessValue">35</span></div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Style influence</label>
+              <div class="range-row"><input type="range" min="0" max="100" value="72" id="styleInfluenceRange"><span class="range-value" id="styleInfluenceValue">72</span></div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Audio influence</label>
+              <div class="range-row"><input type="range" min="0" max="100" value="68" id="audioInfluenceRange"><span class="range-value" id="audioInfluenceValue">68</span></div>
+            </div>
+            <div class="toggle-box" style="margin-top:12px">
+              <button class="mini active" type="button" id="musicVocalBtn">Vocal On</button>
+              <button class="mini" type="button" id="musicInstrumentalBtn">Instrumental Off</button>
+            </div>
+            <div class="btnbar" style="margin-top:12px">
+              <button class="btn gold" id="generateMusicBtn">Generate Music</button>
+            </div>
+          </div>
+          <div class="subpanel stack-out">
+            <div>
+              <div class="tiny" style="margin-bottom:6px">Jingle</div>
+              <div class="small-output" id="musicJingleOutput">Jingle prompt will land here.</div>
+              <div class="btnbar" style="margin-top:8px"><button class="btn ghost" id="copyJingleBtn">Copy Jingle</button></div>
+            </div>
+            <div>
+              <div class="tiny" style="margin-bottom:6px">30-second song</div>
+              <div class="small-output" id="music30Output">30-second song prompt will land here.</div>
+              <div class="btnbar" style="margin-top:8px"><button class="btn ghost" id="copy30Btn">Copy 30s</button></div>
+            </div>
+            <div>
+              <div class="tiny" style="margin-bottom:6px">1-minute song</div>
+              <div class="small-output" id="music60Output">1-minute song prompt will land here.</div>
+              <div class="btnbar" style="margin-top:8px"><button class="btn ghost" id="copy60Btn">Copy 1m</button></div>
+            </div>
+            <div>
+              <div class="tiny" style="margin-bottom:6px">Lyrics</div>
+              <div class="small-output" id="musicLyricsOutput">Lyrics will land here.</div>
+              <div class="btnbar" style="margin-top:8px">
+                <button class="btn ghost" id="copyLyricsBtn">Copy Lyrics</button>
+                <button class="btn ghost" id="copyInstrumentalBtn">Copy Instrumental Prompt</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-pad" style="margin-top:18px">
+      <h2 class="section-title">Marketing Content Generator <span class="tiny">single-card and full-deck promo content</span></h2>
+      <div class="phase-note"><strong>Addition-only restore:</strong> captions, hashtags, SEO keywords, CTA, email promo, platform promos, and ad copy tied to the current prompt and deck workflow.</div>
+      <div class="btnbar" style="margin-bottom:12px">
+        <button class="btn gold" id="generateMarketingBtn">Generate Marketing</button>
+        <button class="btn ghost" id="copyAllMarketingBtn">Copy All Marketing</button>
+      </div>
+      <div class="grid">
+        <div class="subpanel stack-out">
+          <div><div class="tiny" style="margin-bottom:6px">Caption</div><div class="small-output" id="captionOutput">Caption will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">Hashtags</div><div class="small-output" id="hashtagsOutput">Hashtags will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">SEO keywords</div><div class="small-output" id="seoOutput">SEO keywords will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">Call to action</div><div class="small-output" id="ctaOutput">CTA options will land here.</div></div>
+        </div>
+        <div class="subpanel stack-out">
+          <div><div class="tiny" style="margin-bottom:6px">Email promo</div><div class="small-output" id="emailOutput">Email promo will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">TikTok promo</div><div class="small-output" id="tiktokOutput">TikTok promo will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">Instagram promo</div><div class="small-output" id="instagramOutput">Instagram promo will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">Pinterest promo</div><div class="small-output" id="pinterestOutput">Pinterest promo will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">Facebook promo</div><div class="small-output" id="facebookOutput">Facebook promo will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">YouTube promo</div><div class="small-output" id="youtubeOutput">YouTube promo will land here.</div></div>
+          <div><div class="tiny" style="margin-bottom:6px">Ad copy</div><div class="small-output" id="adOutput">Ad copy will land here.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">all rights reserved by glamorousgrammyglowup</div>
+  </div>
+
+  
+  <div class="scroll-fabs" aria-label="Scroll buttons">
+    <button class="scroll-fab hidden" id="scrollTopBtn" type="button" title="Scroll to top"><span>↑</span></button>
+    <button class="scroll-fab" id="scrollBottomBtn" type="button" title="Scroll to bottom"><span>↓</span></button>
+  </div>
+
+<script>
+    const controls = [
+      {id:'gender', label:'Gender', options:['none','female','male']},
+      {id:'ethnicity', label:'Ethnicity', options:['none','African','African American','Afro-Latina','Afro-Caribbean','Asian','Black','Black British','Caribbean','East Asian','European','French','Indigenous','Latina','Mediterranean','Middle Eastern','Mixed race','North African','South Asian','Southeast Asian','White']},
+      {id:'duo', label:'Duo Composition', options:['none','solo portrait','royal duo portrait','king and queen pair card','mirrored duo card display','split-card duo composition']},
+      {id:'deckMode', label:'Deck Mode', options:['none','single featured card','full deck builder','single suit builder','court card builder','number card run','joker builder']},
+      {id:'cardRank', label:'Card Rank', options:['none','ace','2','3','4','5','6','7','8','9','10','jack','queen','king','joker']},
+      {id:'cardType', label:'Card Type', options:['none','illustrated number card','face card portrait','ace portrait','ace symbol card','joker portrait','joker abstract']},
+      {id:'jokerStyle', label:'Joker Style', options:['none','luxury jester','dark carnival joker','glam joker queen','abstract joker artifact','theatrical chaos joker','collectible joker poster-card']},
+      {id:'numberArt', label:'Number Card Art Mode', options:['none','illustrated suit tableau','character-led number card','symbolic number scene','ornamental number card','luxury collectible number card']},
+      {id:'suitTheme', label:'Suit Theme', options:['none','hearts','spades','diamonds','clubs']},
+      {id:'suitSymbol', label:'Suit Symbol Styling', options:['none','classic printed suits','jeweled suit symbols','embossed metallic suits','glowing suit symbols','gothic suit emblems','crystal-cut suit icons','ornate filigree suits','minimalist luxury suits','iridescent suit symbols','rainbow crystal suits','abstract cosmic suits']},
+      {id:'archetype', label:'Character Archetype', options:['none','royal muse','casino queen','card king','glamorous gambler','heartbreak empress','spade siren','diamond diva','club monarch','luxury trickster','velvet ruler','mysterious high-roller','regal showstopper','wonderland heart queen','gothic ace empress','surreal suit oracle']},
+      {id:'cultural', label:'Cultural Royal Styling', options:['none','regal Afro-futurist queen','sacred heart monarch','ornate heritage queen','ceremonial diamond empress','silver frost queen','divine card sovereign']},
+      {id:'scene', label:'Scene Type', options:['none','stepping out of a giant card','framed inside a luxury playing card','breaking through a cracked card wall','floating in a storm of playing cards','seated on a throne of cards','standing atop a stacked card tower','emerging from smoke inside a card frame','surrounded by exploding card shards','posed in front of an oversized card backdrop','rising from a luxury card portal','trapped inside a glass card case','revealed through a torn card opening']},
+      {id:'breakout', label:'Breakout Style', options:['none','soft smoke emergence','card-surface rise','full-body card step-out','explosive side breakout','hand-held card burst','portrait card awakening','dimensional card rupture','stacked-deck emergence']},
+      {id:'cardFrame', label:'Card Frame Style', options:['none','ornate gothic card frame','baroque gold frame','cracked stone card frame','luxury crystal card frame','classic printed playing card','throne-backed card frame','portrait easel card display','floating luxury card panel']},
+      {id:'wardrobe', label:'Wardrobe', options:['none','rhinestone corset gown','crystal-studded evening dress','red satin royal gown','black velvet glam dress','white structured royal suit','red-and-black casino tuxedo','gold embroidered regal set','jeweled bodysuit','dramatic cape ensemble','card-print couture dress','fitted blazer and trousers','embellished jumpsuit','metallic fantasy armor','sheer crystal overlay gown','luxury high-slit dress','black leather corset armor','gothic queen gown','embroidered royal tunic','ceremonial king robe','structured bustier dress','dark fantasy bodice','regal brocade jacket','spade-emblem armor','romantic pin-up corset set','card-frame portrait styling','silver crystal queen gown','fur-trimmed royal mantle','heart-emblem ceremonial robe','sculpted silver fantasy dress','flowing ruby romance gown','ornate heritage royal garment','card-doll couture silhouette','luminous breakout bodice','pastel royal co-ord set','cape-shoulder fashion set','white lace doll dress','silver armored bodice','fitted casino cocktail dress','fur-collar queen mantle','tailored white boss suit','power-shoulder royal set','glam mob-boss suit','wonderland royal fur stole','high-collar gothic heart gown','harlequin heart bodice','surreal cathedral queen styling']},
+      {id:'footwear', label:'Footwear', options:['none','red stiletto heels','crystal heels','thigh-high boots','knee-high boots','glossy pointed pumps','embellished sandals','luxury ankle boots','white dress shoes','polished loafers','royal heeled boots']},
+      {id:'crown', label:'Crown / Headpiece', options:['none','diamond crown','ruby crown','emerald crown','black crystal crown','gold filigree crown','jeweled tiara','card-symbol headpiece','rhinestone halo','dramatic bow fascinator','jeweled veil','tall spiked crown','smooth royal band crown','heart-jewel crown','spade-emblem crown','heavy ceremonial crown','antique gold crown','dark steel crown','icy crystal crown','oversized heart crown','branching fantasy crown','heritage jewel headdress','sacred gemstone crown','silver spike tiara','lacework silver tiara','delicate gold crown','floating crown halo','regal braid crown','slim filigree crown','no crown']},
+      {id:'hairStyle', label:'Hair Style', options:['none','long Hollywood waves','sleek straight glam','voluminous curls','elegant updo','braided crown style','side-swept waves','sculpted bob','high ponytail glam','soft romantic curls','finger-wave vintage glam','ultra-long ice-straight hair','windswept royal waves','soft dimensional glam blowout','rounded natural afro','silver-white fantasy hair','long fantasy blue waves','long fantasy pink waves','braided silver loc crown','polished soft glam curls','doll-like soft volume','vivid red royal curls','sleek queen updo','slicked-back hair','modern fade','wavy brushed-back style','sharp side part','textured luxury crop','shoulder-length waves','polished pompadour','curly defined top','clean close-cut fade','classic gentleman style','silver locs','groomed royal loc style','sleek dark side-swept hair']},
+      {id:'hairColor', label:'Hair Color', options:['none','black','brown','blonde','silver','white platinum','blue','pink','gray silver','red','vivid red','fantasy mixed tones']},
+      {id:'makeup', label:'Makeup / Grooming', options:['none','soft glam','full editorial glam','smoky eye luxury glam','glossy nude lips','bold red lips','radiant skin finish','crystal eye accents','dramatic lashes','sculpted contour','natural luxe beauty','clean groomed finish','sculpted jaw emphasis','luxury skin glow','editorial shadow definition','polished high-fashion grooming','subtle dramatic contour']},
+      {id:'jewelry', label:'Jewelry / Accessories', options:['none','diamond chandelier earrings','layered crystal necklace','ruby statement necklace','emerald gem jewelry','stacked gold bangles','ornate rings','satin gloves','jeweled clutch','luxury cane','royal scepter','mirrored sunglasses','ornate pocket watch','crystal brooch','card-shaped earrings','suit-symbol pendant','oversized royal ring','gemstone ear stud','regal collar necklace','smoking cigarette holder','flaming card fan','jeweled heart relic','luxury portrait easel','black gloves with claw nails','heart gemstone brooch','royal staff','ceremonial shoulder jewels','heritage drop earrings','crystal collar statement piece','casino chip accent','floating heart charms','diamond choker collar','oversized hoop earrings','layered tennis jewelry','fur-trim shoulder detail','statement tie and pocket square','luxury cigar','royal duo jewelry styling','pocket watch','wonderland diamond jewels','cathedral collar necklace','ornate face filigree makeup','rabbit companion']},
+      {id:'prop', label:'Prop Focus', options:['none','flaming cards','jeweled heart','cigarette holder','crystal ace card','royal portrait card','roses','throne','rubble burst','candlelight','flaming heart','royal scepter','casino chip','stacked deck','floating heart charms','smoke veil','glowing dice','luxury cigar','card fan halo','pink butterflies','rubble floor','neon light scribes','white rabbit','pocket watch','rainbow suit symbol','gothic frame vines']},
+      {id:'casinoProp', label:'Casino Prop Style', options:['none','glowing dice','stacked deck','floating deck fan','casino chip stack','neon casino glow','luxury game-table styling']},
+      {id:'throne', label:'Throne Style', options:['none','gothic black throne','carved royal throne','spade-emblem throne','velvet high-back throne','dark fantasy throne','jewel-studded throne','metallic luxury throne']},
+      {id:'interaction', label:'Card Interaction', options:['none','holding a giant ace card','touching floating cards','standing inside the card border','reaching out through the card frame','stepping through shattered card edges','wrapped in swirling cards','wearing a dress made of cards','holding a transparent card umbrella','fanning cards dramatically','leaning against a giant card','emerging from stacked cards','surrounded by spinning suit symbols','holding a custom face card portrait','presenting a single royal card','emerging through shattered wall and card','seated within the card frame','displayed as framed card art','holding a flaming fan of cards','holding a jeweled heart object','posed beside a luxury crystal ace','rising from the center of a card','seated deep within the card art','emerging from a giant stacked deck','exploding out from a hand-held deck','framed as a printed royal portrait','surrounded by floating heart symbols','standing in front of a broken queen card','emerging from a stacked deck frame','seated against oversized aces','framed by a fan of cards','posed as a two-card royal pair','inside a deep card-window frame']},
+      {id:'motion', label:'Motion / Effects', options:['none','gray smoke clouds','white smoke swirl','glitter explosion','floating petals','shattered debris','glowing spark trails','rain shimmer','crystal dust','flying card fragments','luxury fog','liquid splash','heart confetti','ember glow','neon aura','magical light burst','burning card flames','fiery chest glow','drifting smoke clouds','wall-break debris burst','rose petal scatter','soft bokeh sparks','glowing ember particles','luxury shine flares','floating heart symbols','red smoke plume','streaking energy trails','explosive shard burst','smoke veil drift','glowing rupture light','storm-cloud atmosphere','pink powder bloom','butterfly drift','neon light trails','glowing card scatter','fire-smoke edge burn','floating rubble dust','card-fan halo glow','rainbow smoke plumes','cosmic glitter dust','magical star scatter','velvet red mist']},
+      {id:'background', label:'Background', options:['none','dark luxury void','smoky editorial backdrop','rainy city street','glowing casino hall','palace-inspired interior','spotlight studio','moody black gradient','dramatic cloudscape','velvet stage setting','gothic luxury hallway','marble fantasy room','glowing night alley','chandelier ballroom','jewel-lit throne room','romantic candlelit ballroom','rose-filled luxury set','foggy palace courtyard','cracked stone wall','dark throne chamber','cinematic gray sky','sparkling black studio','reflective luxury surface','fog-filled card chamber','storm-heart sky','giant stacked deck set','minimal luxury card backdrop','dark void with energy streaks','printed portrait card surface','pastel fantasy card set','clean gray studio','casino night bokeh','cloudy royal sky','black fire void','tabletop casino display','wonderland dark portrait set','abstract black art backdrop','gothic cathedral hall']},
+      {id:'lighting', label:'Lighting', options:['none','soft glam lighting','dramatic spotlight','moody side lighting','golden luxury glow','silver editorial light','jewel-toned reflections','smoky backlight','rain-lit city glow','cinematic high contrast','glossy studio light','candlelit romance glow','fiery dramatic glow','polished crystal reflections','dark throne lighting','soft luxury portrait light','museum-display spotlight','icy silver glow','sacred heart glow','explosive breakout light','soft fog portrait light','high-contrast card spotlight','pastel glam glow','casino bokeh glow','fire-edge illumination','clean studio brightness','luxury tabletop reflections','enchanted portrait glow','cosmic neon glow','moody cathedral light']},
+      {id:'palette', label:'Color Palette', options:['none','red black and gold','black white and silver','ruby and champagne','emerald and gold','crimson and ivory','black and deep burgundy','diamond white and platinum','midnight black and red','royal gold and cream','jewel-tone mix','black and gunmetal silver','red rose and champagne gold','obsidian and ember orange','ivory black and gold','smoky gray and crimson','crystal gold and black','silver white and charcoal','ruby red and ivory','crimson black and pearl','teal gold and rust','frost silver and smoke gray','blush pink and gold','cobalt blue and red','silver and ivory','black gold and flame','soft pink and white','cloudy gray and gold','vivid red black and white','rainbow jewel smoke','teal crimson and ivory']},
+      {id:'mood', label:'Mood', options:['none','seductive','powerful','mysterious','romantic','dangerous elegance','regal','dramatic','glamorous','cold luxury','dreamy','commanding','hypnotic','gothic regal','seductive power','romantic decadence','dangerous royalty','dark enchantment','ceremonial luxury','untouchable elegance','icy authority','sacred romance','mystical power','divine elegance','heroic breakout','quiet dominance','playful luxury','pastel fantasy','bossed-up glam','royal duo prestige','fiery temptation','polished confidence','wonderland mystery','surreal enchantment','regal obsession']},
+      {id:'pose', label:'Pose', options:['none','front-facing power pose','elegant seated pose','stepping forward pose','hand-reaching breakout pose','over-the-shoulder glam pose','runway stride','floating pose','throne pose','side-profile elegance','dramatic arm extension','fashion portrait stance','leaning pose']},
+      {id:'framing', label:'Framing', options:['none','full-body portrait','three-quarter portrait','close beauty portrait','centered poster composition','asymmetrical editorial layout','vertical card frame composition','cinematic full-length shot','dramatic close crop','symmetrical royal portrait','fashion cover framing']},
+      {id:'finish', label:'Finish / Style Output', options:['none','ultra-realistic editorial','glossy fantasy realism','cinematic luxury poster','dark romantic realism','high-fashion surrealism','premium wall-art finish','rich 3D fantasy','polished ad-style realism','jewel-toned fantasy poster','gallery-worthy luxury art']}
+    ];
+
+    const styleLocks = ['Royal Breakout','Card Fashion','Dark Casino','Crystal Luxe','Rain Romance','Throne Drama','Neon High-Roller','Shattered Card Fantasy','Gothic Spade Royalty','Romantic Hearts Portrait','Ice Queen Clubs','Sacred Hearts Royalty','Explosive Card Breakout','Heritage Diamond Queen','Pastel Card Doll','Casino Luxe Nights','Royal Duo Portrait','Boss Ace Glam','Wonderland Hearts','Cosmic Suit Art','Gothic Cathedral Queen'];
+
+    const presets = [
+      'Crimson Wonderland Heart Queen','White Rabbit Royal Hearts Muse','Pocket Watch Heart Empress','Gothic Cathedral Ace Queen','Teal Crimson Cathedral Royalty','Cosmic Ace of Spades Oracle','Rainbow Smoke Spade Artifact','Iridescent Suit Goddess','Black Fire Ace Boss','Cigar Queen of Spades Glam','Silver Frost Club Queen','Ice Crown Club Empress','Frost Smoke Crystal Club Muse','Sacred Heart King of Hearts','Flaming Heart Royal Monarch','Ruby Ivory Heart Sovereign','Romantic Hearts Portrait Queen','Rose Ballroom Heart Queen','Candlelit Queen of Hearts Frame','Baroque Gold Heart Muse','Pastel Card Doll Queen','Pink Butterfly Card Princess','Lace Doll Queen in Bloom','Blush Gold Fantasy Card Muse','Explosive Handheld Ace Breakout','Shattered Queen Card Breakout','Dimensional Rupture Spade Queen','Neon Breakout Club Empress','Stacked Deck Queen Awakening','Crystal Ace Luxe Display','Gold Filigree Spade Artifact','Luxury Tabletop Casino Muse','Glowing Dice Ace Glam','Casino Luxe Night Queen','Mirror Card Royal Duo','King and Queen Prestige Portrait','Silver Royal Pair Display','Fur Mantle Hearts Duo','Heritage Diamond Queen','Afro-Futurist Diamond Empress','Teal Gold Diamond Sovereign','Regal Natural Afro Card Queen','Vivid Red Heart Queen','Harlequin Hearts Royal Muse','Blue Hair Breakout Queen','Pink Gold Cape Royalty','Gothic Spade Throne Queen','Flaming Card Fan Spade Siren','Dark Steel Crown Royal Breakout','Wonderland Obsession Heart Muse',
+      'Scarlet Rabbit Royale','Diamond Clockwork Heart Queen','Velvet Hearts Wonderland Muse','Crimson Rabbit Crown Empress','Red Obsession Pocket Watch Queen','Midnight Cathedral Ace Empress','Stained Glass Gothic Queen','Cathedral Shadow Heart Sovereign','Thorned Ace Cathedral Muse','Sacred Hall Queen of Hearts','Cosmic Rainbow Spade Relic','Neon Smoke Ace Oracle','Starfire Suit Artifact','Prism Spade Dream Card','Liquid Rainbow Ace Vision','Frosted Club Portal Queen','Silver Smoke Club Sovereign','White Platinum Club Royalty','Crystal Mist Club Enchantress','Frozen Crown Club Siren','Ruby Throne Hearts Monarch','Rose Dust Heart Breakout','Candle Queen Velvet Hearts','Crimson Palace Heart Empress','Sweetheart Frame Royalty','Pink Powder Doll Queen','Butterfly Lace Card Muse','Cherry Blossom Card Princess','Cotton Candy Hearts Empress','Soft Bloom Queen of Hearts','Sapphire Breakout Queen','Blue Wave Diamond Royalty','Pink Cape Queen Explosion','Clean Studio Card Monarch','Pop Glam Card Breakout','Gold Dice Casino Empress','High Roller Ace Seduction','Tabletop Luxe Card Darling','Bokeh Nights Casino Queen','Neon Dice Royal Muse','Twin Crown Prestige Pair','Royal Silver Hearts Duo','King Queen Velvet Power Pair','Mirror Crown Sovereigns','Frost and Flame Royal Pair','White Suit Ace Boss','Fire Ring Spade King','Smoke Edge Ace Maverick','Cigar Flame Card Boss','Diamond Smoke Mob Queen'
+    ];
+
+    const presetLockMap = {
+      'Crimson Wonderland Heart Queen':['Wonderland Hearts','Romantic Hearts Portrait'],
+      'White Rabbit Royal Hearts Muse':['Wonderland Hearts','Romantic Hearts Portrait'],
+      'Pocket Watch Heart Empress':['Wonderland Hearts'],
+      'Gothic Cathedral Ace Queen':['Gothic Cathedral Queen'],
+      'Teal Crimson Cathedral Royalty':['Gothic Cathedral Queen'],
+      'Cosmic Ace of Spades Oracle':['Cosmic Suit Art'],
+      'Rainbow Smoke Spade Artifact':['Cosmic Suit Art'],
+      'Black Fire Ace Boss':['Boss Ace Glam'],
+      'Cigar Queen of Spades Glam':['Boss Ace Glam','Dark Casino'],
+      'Silver Frost Club Queen':['Ice Queen Clubs'],
+      'Ice Crown Club Empress':['Ice Queen Clubs'],
+      'Frost Smoke Crystal Club Muse':['Ice Queen Clubs','Crystal Luxe'],
+      'Sacred Heart King of Hearts':['Sacred Hearts Royalty'],
+      'Flaming Heart Royal Monarch':['Sacred Hearts Royalty'],
+      'Romantic Hearts Portrait Queen':['Romantic Hearts Portrait'],
+      'Pastel Card Doll Queen':['Pastel Card Doll'],
+      'Pink Butterfly Card Princess':['Pastel Card Doll'],
+      'Explosive Handheld Ace Breakout':['Explosive Card Breakout'],
+      'Shattered Queen Card Breakout':['Explosive Card Breakout','Royal Breakout'],
+      'Neon Breakout Club Empress':['Explosive Card Breakout','Neon High-Roller'],
+      'Crystal Ace Luxe Display':['Crystal Luxe'],
+      'Luxury Tabletop Casino Muse':['Casino Luxe Nights'],
+      'Glowing Dice Ace Glam':['Casino Luxe Nights'],
+      'Casino Luxe Night Queen':['Casino Luxe Nights'],
+      'Mirror Card Royal Duo':['Royal Duo Portrait'],
+      'King and Queen Prestige Portrait':['Royal Duo Portrait'],
+      'Heritage Diamond Queen':['Heritage Diamond Queen'],
+      'Afro-Futurist Diamond Empress':['Heritage Diamond Queen'],
+      'Gothic Spade Throne Queen':['Gothic Spade Royalty','Throne Drama'],
+      'Flaming Card Fan Spade Siren':['Gothic Spade Royalty'],
+      'Wonderland Obsession Heart Muse':['Wonderland Hearts'],
+      'Scarlet Rabbit Royale':['Wonderland Hearts'],
+      'Midnight Cathedral Ace Empress':['Gothic Cathedral Queen'],
+      'Cosmic Rainbow Spade Relic':['Cosmic Suit Art'],
+      'Frosted Club Portal Queen':['Ice Queen Clubs'],
+      'Ruby Throne Hearts Monarch':['Sacred Hearts Royalty','Throne Drama'],
+      'Pink Powder Doll Queen':['Pastel Card Doll'],
+      'Gold Dice Casino Empress':['Casino Luxe Nights'],
+      'Twin Crown Prestige Pair':['Royal Duo Portrait'],
+      'White Suit Ace Boss':['Boss Ace Glam'],
+      'Cigar Flame Card Boss':['Boss Ace Glam']
+    };
+
+    const lockRules = {
+      'Gothic Spade Royalty':{ suitTheme:'spades', palette:'black and gunmetal silver', throne:'gothic black throne', wardrobe:'black leather corset armor', crown:'dark steel crown', motion:'burning card flames', lighting:'dark throne lighting', mood:'gothic regal' },
+      'Romantic Hearts Portrait':{ suitTheme:'hearts', cardFrame:'baroque gold frame', prop:'roses', background:'rose-filled luxury set', palette:'red rose and champagne gold', mood:'romantic decadence', lighting:'candlelit romance glow' },
+      'Ice Queen Clubs':{ suitTheme:'clubs', cultural:'silver frost queen', crown:'icy crystal crown', wardrobe:'silver crystal queen gown', hairStyle:'ultra-long ice-straight hair', background:'fog-filled card chamber', lighting:'icy silver glow', palette:'frost silver and smoke gray', mood:'icy authority' },
+      'Sacred Hearts Royalty':{ suitTheme:'hearts', cultural:'sacred heart monarch', prop:'flaming heart', jewelry:'heart gemstone brooch', wardrobe:'heart-emblem ceremonial robe', lighting:'sacred heart glow', palette:'ruby red and ivory', mood:'sacred romance' },
+      'Explosive Card Breakout':{ breakout:'explosive side breakout', interaction:'exploding out from a hand-held deck', motion:'glowing rupture light', background:'dark void with energy streaks', mood:'heroic breakout' },
+      'Heritage Diamond Queen':{ suitTheme:'diamonds', cultural:'ornate heritage queen', crown:'heritage jewel headdress', wardrobe:'ornate heritage royal garment', jewelry:'heritage drop earrings', palette:'teal gold and rust', mood:'divine elegance' },
+      'Pastel Card Doll':{ palette:'soft pink and white', wardrobe:'white lace doll dress', hairStyle:'long fantasy pink waves', motion:'butterfly drift', background:'pastel fantasy card set', mood:'pastel fantasy', lighting:'pastel glam glow' },
+      'Casino Luxe Nights':{ casinoProp:'glowing dice', background:'casino night bokeh', lighting:'luxury tabletop reflections', finish:'polished ad-style realism', mood:'playful luxury' },
+      'Royal Duo Portrait':{ duo:'royal duo portrait', jewelry:'royal duo jewelry styling', palette:'cloudy gray and gold', mood:'royal duo prestige' },
+      'Boss Ace Glam':{ cardRank:'ace', wardrobe:'tailored white boss suit', prop:'luxury cigar', motion:'fire-smoke edge burn', palette:'black gold and flame', mood:'polished confidence' },
+      'Wonderland Hearts':{ archetype:'wonderland heart queen', prop:'white rabbit', jewelry:'pocket watch', hairColor:'vivid red', wardrobe:'wonderland royal fur stole', palette:'vivid red black and white', mood:'wonderland mystery' },
+      'Cosmic Suit Art':{ cardRank:'ace', suitSymbol:'abstract cosmic suits', motion:'rainbow smoke plumes', lighting:'cosmic neon glow', palette:'rainbow jewel smoke', mood:'surreal enchantment' },
+      'Gothic Cathedral Queen':{ archetype:'gothic ace empress', wardrobe:'surreal cathedral queen styling', background:'gothic cathedral hall', cardFrame:'ornate gothic card frame', jewelry:'cathedral collar necklace', lighting:'moody cathedral light', palette:'teal crimson and ivory', mood:'regal obsession' },
+      'Crystal Luxe':{ cardFrame:'luxury crystal card frame', suitSymbol:'crystal-cut suit icons', lighting:'polished crystal reflections', palette:'crystal gold and black', finish:'rich 3D fantasy' },
+      'Royal Breakout':{ scene:'breaking through a cracked card wall', breakout:'full-body card step-out', interaction:'stepping through shattered card edges', motion:'shattered debris' },
+      'Card Fashion':{ wardrobe:'card-print couture dress', interaction:'wearing a dress made of cards', pose:'runway stride', motion:'rain shimmer' },
+      'Dark Casino':{ background:'glowing casino hall', palette:'midnight black and red', lighting:'moody side lighting', mood:'dangerous elegance' },
+      'Rain Romance':{ background:'rainy city street', interaction:'holding a transparent card umbrella', motion:'rain shimmer', mood:'romantic' },
+      'Throne Drama':{ scene:'seated on a throne of cards', pose:'throne pose', throne:'carved royal throne' },
+      'Neon High-Roller':{ casinoProp:'neon casino glow', motion:'neon light trails', lighting:'casino bokeh glow', mood:'bossed-up glam' },
+      'Shattered Card Fantasy':{ scene:'breaking through a cracked card wall', motion:'wall-break debris burst', background:'cracked stone wall' }
+    };
+
+    const genderRestricted = {
+      femaleOnly:{
+        wardrobe:['rhinestone corset gown','crystal-studded evening dress','red satin royal gown','black velvet glam dress','jeweled bodysuit','luxury high-slit dress','gothic queen gown','structured bustier dress','romantic pin-up corset set','silver crystal queen gown','sculpted silver fantasy dress','flowing ruby romance gown','card-doll couture silhouette','luminous breakout bodice','pastel royal co-ord set','white lace doll dress','fitted casino cocktail dress','fur-collar queen mantle','wonderland royal fur stole','high-collar gothic heart gown','harlequin heart bodice'],
+        footwear:['red stiletto heels','crystal heels','thigh-high boots','knee-high boots','glossy pointed pumps','embellished sandals','royal heeled boots'],
+        makeup:['soft glam','full editorial glam','smoky eye luxury glam','glossy nude lips','bold red lips','radiant skin finish','crystal eye accents','dramatic lashes','sculpted contour','natural luxe beauty']
+      },
+      maleOnly:{
+        wardrobe:['white structured royal suit','red-and-black casino tuxedo','fitted blazer and trousers','embroidered royal tunic','ceremonial king robe','regal brocade jacket','tailored white boss suit','glam mob-boss suit'],
+        footwear:['white dress shoes','polished loafers'],
+        makeup:['clean groomed finish','sculpted jaw emphasis','luxury skin glow','editorial shadow definition','polished high-fashion grooming','subtle dramatic contour']
+      }
+    };
+
+    const negativeLock = 'clean elegant anatomy, no broken limbs, no duplicate body parts, no distorted hands, no awkward cut lines, no harsh compositing edges, believable pose, polished luxury styling, premium cohesive background, no low-detail card symbols';
+
+    const controlsGrid = document.getElementById('controlsGrid');
+    const output = document.getElementById('output');
+    const historyEl = document.getElementById('history');
+    const styleLocksEl = document.getElementById('styleLocks');
+    const presetWrap = document.getElementById('presetWrap');
+    const styleSnapshotStatus = document.getElementById('styleSnapshotStatus');
+    const savedStylesEl = document.getElementById('savedStyles');
+    const refUpload = document.getElementById('refUpload');
+    const refStatus = document.getElementById('refStatus');
+    const toggleRefBtn = document.getElementById('toggleRefBtn');
+    let refOn = false;
+    let refName = '';
+    let selectedPreset = '';
+    const selectedLocks = new Set();
+    let deckConsistencyOn = false;
+    let lockedStyle = null;
+
+    let promptGlowOn = JSON.parse(localStorage.getItem('houseOfCardsPromptGlow') || 'false');
+    let historyGlowOn = JSON.parse(localStorage.getItem('houseOfCardsHistoryGlow') || 'false');
+
+    const identityKeys = ['deckMode','cardRank','cardType','jokerStyle','numberArt','suitTheme'];
+
+    const singleSelectControlIds = new Set(['gender','ethnicity','duo','deckMode','cardRank','cardType','jokerStyle','numberArt','suitTheme']);
+
+    function isMultiSelectControl(id){
+      return !singleSelectControlIds.has(id);
+    }
+
+    function getSelectedValues(id){
+      const el = document.getElementById(id);
+      if(!el) return [];
+      return [...el.options].filter(o=>o.selected && o.value !== 'none').map(o=>o.value);
+    }
+
+    function getPrimaryValue(id){
+      const values = getSelectedValues(id);
+      if(values.length) return values[0];
+      const el = document.getElementById(id);
+      return el ? (el.value || 'none') : 'none';
+    }
+
+    function setSelectedValues(id, values){
+      const el = document.getElementById(id);
+      if(!el) return;
+      const wanted = new Set((Array.isArray(values) ? values : [values]).filter(Boolean));
+      let matched = false;
+      [...el.options].forEach(opt=>{
+        if(opt.value === 'none'){
+          opt.selected = !wanted.size;
+          return;
+        }
+        const pick = wanted.has(opt.value);
+        opt.selected = pick;
+        if(pick) matched = true;
+      });
+      if(!matched && el.options.length) el.value = 'none';
+    }
+
+    function addSelectedValue(id, value){
+      if(!value || value === 'none') return;
+      const current = getSelectedValues(id);
+      if(current.includes(value)) return;
+      setSelectedValues(id, [...current, value]);
+    }
+
+    function getPromptSelections(){
+      return Object.fromEntries(controls.map(c=>{
+        const values = getSelectedValues(c.id);
+        if(values.length <= 1) return [c.id, values[0] || 'none'];
+        return [c.id, values];
+      }));
+    }
+
+    function normalizePromptValue(value){
+      if(Array.isArray(value)) return value.filter(Boolean).join(', ');
+      return value;
+    }
+
+    function getPrimarySelections(){
+      return Object.fromEntries(controls.map(c=>[c.id, getPrimaryValue(c.id)]));
+    }
+
+    function getCurrentSelections(includeNone=false){
+      return Object.fromEntries(controls.map(c=>[c.id, getPrimaryValue(c.id)]).filter(([,v])=>includeNone || (v && v !== 'none')));
+    }
+
+    function createStyleSnapshot(label='Locked Deck Style'){
+      sanitizeSelections();
+      enforceDeckSafety();
+      const selections = getCurrentSelections(true);
+      const styleSelections = {};
+      controls.forEach(c=>{
+        if(!identityKeys.includes(c.id) && selections[c.id] && selections[c.id] !== 'none') styleSelections[c.id] = selections[c.id];
+      });
+      return {
+        id: Date.now().toString(36),
+        label: (document.getElementById('snapshotName').value || label || selectedPreset || 'Locked Deck Style').trim(),
+        createdAt: new Date().toLocaleString(),
+        preset: selectedPreset || '',
+        locks: [...selectedLocks],
+        selections,
+        styleSelections,
+        customConcept: document.getElementById('customConcept').value.trim(),
+        refOn,
+        refName
+      };
+    }
+
+    function updateStyleSnapshotStatus(){
+      if(!styleSnapshotStatus) return;
+      if(!lockedStyle){
+        styleSnapshotStatus.textContent = 'No locked style yet.\nLock a preset, random result, or manual build you love, then use it across the rest of the deck.';
+        return;
+      }
+      const bits = [];
+      bits.push(`Locked Style: ${lockedStyle.label}`);
+      bits.push(`Saved: ${lockedStyle.createdAt}`);
+      if(lockedStyle.preset) bits.push(`Preset Source: ${lockedStyle.preset}`);
+      if(lockedStyle.locks?.length) bits.push(`Style Locks: ${lockedStyle.locks.join(', ')}`);
+      const core = [];
+      ['duo','cardFrame','wardrobe','crown','hairStyle','hairColor','jewelry','background','lighting','palette','mood','finish'].forEach(k=>{
+        if(lockedStyle.styleSelections?.[k]) core.push(`${k}: ${lockedStyle.styleSelections[k]}`);
+      });
+      if(core.length) bits.push(`Style DNA: ${core.join(' • ')}`);
+      if(lockedStyle.customConcept) bits.push(`Custom Concept: ${lockedStyle.customConcept}`);
+      bits.push(`Deck Consistency: ${deckConsistencyOn ? 'On' : 'Off'}`);
+      styleSnapshotStatus.textContent = bits.join('\n');
+    }
+
+    function saveLockedStyleToStorage(){
+      if(!lockedStyle) return;
+      localStorage.setItem('houseOfCardsLockedStyle', JSON.stringify(lockedStyle));
+    }
+
+    function loadLockedStyleFromStorage(){
+      try{
+        const raw = localStorage.getItem('houseOfCardsLockedStyle');
+        if(raw) lockedStyle = JSON.parse(raw);
+      }catch(e){ lockedStyle = null; }
+    }
+
+    function renderSavedStyles(){
+      if(!savedStylesEl) return;
+      let items = [];
+      try{ items = JSON.parse(localStorage.getItem('houseOfCardsStyleSnapshots') || '[]'); }catch(e){ items = []; }
+      savedStylesEl.innerHTML = '';
+      if(!items.length){
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'No saved snapshots yet';
+        savedStylesEl.appendChild(opt);
+        return;
+      }
+      const top = document.createElement('option');
+      top.value = '';
+      top.textContent = 'Choose a saved snapshot';
+      savedStylesEl.appendChild(top);
+      items.forEach(item=>{
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = `${item.label} — ${item.createdAt}`;
+        savedStylesEl.appendChild(opt);
+      });
+    }
+
+    function lockCurrentStyle(){
+      lockedStyle = createStyleSnapshot(selectedPreset || 'Locked Deck Style');
+      saveLockedStyleToStorage();
+      updateStyleSnapshotStatus();
+    }
+
+    function saveCurrentStyleSnapshot(){
+      const snapshot = createStyleSnapshot(selectedPreset || 'Saved Deck Style');
+      let items = [];
+      try{ items = JSON.parse(localStorage.getItem('houseOfCardsStyleSnapshots') || '[]'); }catch(e){ items = []; }
+      items.unshift(snapshot);
+      localStorage.setItem('houseOfCardsStyleSnapshots', JSON.stringify(items.slice(0,30)));
+      lockedStyle = snapshot;
+      saveLockedStyleToStorage();
+      renderSavedStyles();
+      updateStyleSnapshotStatus();
+      alert('Style snapshot saved.');
+    }
+
+    function loadSavedStyleSnapshot(){
+      const id = savedStylesEl.value;
+      if(!id) return;
+      let items = [];
+      try{ items = JSON.parse(localStorage.getItem('houseOfCardsStyleSnapshots') || '[]'); }catch(e){ items = []; }
+      const found = items.find(x=>x.id === id);
+      if(!found) return;
+      lockedStyle = found;
+      saveLockedStyleToStorage();
+      applyLockedStyle(false);
+      updateStyleSnapshotStatus();
+    }
+
+    function deleteSavedStyleSnapshot(){
+      const id = savedStylesEl.value;
+      if(!id) return;
+      let items = [];
+      try{ items = JSON.parse(localStorage.getItem('houseOfCardsStyleSnapshots') || '[]'); }catch(e){ items = []; }
+      items = items.filter(x=>x.id !== id);
+      localStorage.setItem('houseOfCardsStyleSnapshots', JSON.stringify(items));
+      if(lockedStyle && lockedStyle.id === id){
+        lockedStyle = null;
+        localStorage.removeItem('houseOfCardsLockedStyle');
+      }
+      renderSavedStyles();
+      updateStyleSnapshotStatus();
+    }
+
+    function syncTargetTypeFromRank(rank){
+      if(rank === 'none') return {};
+      const next = { cardRank: rank };
+      const inferred = inferCardType(rank);
+      if(inferred !== 'none') next.cardType = inferred;
+      if(rank === 'joker') next.jokerStyle = 'luxury jester';
+      if(numericRanks.includes(rank)) next.numberArt = 'luxury collectible number card';
+      return next;
+    }
+
+    function applyLockedStyle(generateAfter=false){
+      if(!lockedStyle) return;
+      const targetRank = document.getElementById('targetRank').value;
+      const targetSuit = document.getElementById('targetSuit').value;
+      const targetDeckMode = document.getElementById('targetDeckMode').value;
+
+      const all = lockedStyle.selections || {};
+      controls.forEach(c=>{
+        const el = document.getElementById(c.id);
+        if(!el) return;
+        if(all[c.id] && all[c.id] !== 'none') el.value = all[c.id];
+      });
+      // restore non-control state
+      selectedPreset = lockedStyle.preset || '';
+      [...presetWrap.children].forEach(btn=>btn.classList.toggle('active', btn.textContent === selectedPreset));
+      selectedLocks.clear();
+      (lockedStyle.locks || []).forEach(lock=>selectedLocks.add(lock));
+      renderLocks();
+      if(lockedStyle.customConcept) document.getElementById('customConcept').value = lockedStyle.customConcept;
+      const phase3Selections = lockedStyle.phase3Selections || {};
+      phase3StandaloneIds.forEach(id=>{ const el = document.getElementById(id); if(el && phase3Selections[id] && [...el.options].some(o=>o.value === phase3Selections[id])) el.value = phase3Selections[id]; });
+      refOn = !!lockedStyle.refOn;
+      refName = lockedStyle.refName || '';
+      toggleRefBtn.textContent = refOn ? 'Reference On' : 'Reference Off';
+      refStatus.textContent = refOn ? (refName ? `Reference attached: ${refName}` : 'Reference enabled. Upload an image to tie identity to the prompt.') : 'No reference image attached.';
+
+      if(targetSuit !== 'none') document.getElementById('suitTheme').value = targetSuit;
+      if(targetDeckMode !== 'none') document.getElementById('deckMode').value = targetDeckMode;
+      if(targetRank !== 'none') {
+        const next = syncTargetTypeFromRank(targetRank);
+        Object.entries(next).forEach(([id,val])=>{ const el = document.getElementById(id); if(el && [...el.options].some(o=>o.value===val)) el.value = val; });
+      }
+      sanitizeSelections();
+      enforceDeckSafety();
+      updateStyleSnapshotStatus();
+      if(generateAfter) generatePrompt();
+    }
+
+    function buildStyleCarryoverInstruction(picks){
+      if(!deckConsistencyOn || !lockedStyle) return '';
+      const styleBits = [];
+      ['cardFrame','suitSymbol','wardrobe','crown','hairStyle','hairColor','jewelry','background','lighting','palette','mood','finish'].forEach(k=>{
+        if(lockedStyle.styleSelections?.[k]) styleBits.push(lockedStyle.styleSelections[k]);
+      });
+      const concise = styleBits.slice(0,8).join(', ');
+      const presetText = lockedStyle.preset ? ` from the ${lockedStyle.preset} look` : '';
+      return `keep this card in the exact same deck family as the locked style snapshot${presetText}; preserve the same border, framing, finish, palette, lighting mood, and collectible card-world styling across the deck; style carryover anchor: ${concise}`;
+    }
+
+    function createControls(){
+      controls.forEach(c=>{
+        const field = document.createElement('div');
+        field.className = 'field';
+        const label = document.createElement('label');
+        label.htmlFor = c.id;
+        label.textContent = c.label;
+        const select = document.createElement('select');
+        select.id = c.id;
+        if(isMultiSelectControl(c.id)){
+          select.multiple = true;
+          select.size = Math.min(Math.max(c.options.length - 1, 4), 8);
+        }
+        c.options.forEach(opt=>{
+          const o = document.createElement('option');
+          o.value = opt;
+          o.textContent = opt;
+          select.appendChild(o);
+        });
+        field.append(label,select);
+        controlsGrid.appendChild(field);
+      });
+
+      const rankEl = document.getElementById('cardRank');
+      const deckEl = document.getElementById('deckMode');
+      const typeEl = document.getElementById('cardType');
+      const jokerEl = document.getElementById('jokerStyle');
+      const numberEl = document.getElementById('numberArt');
+
+      if(rankEl && rankEl.value === 'none') {
+        const rankPool = ['ace','2','3','4','5','6','7','8','9','10','jack','queen','king','joker'];
+        setSelectedValues('cardRank', [rankPool[Math.floor(Math.random()*rankPool.length)]]);
+      }
+      if(deckEl && deckEl.value === 'none') {
+        setSelectedValues('deckMode', [['single featured card','full deck builder','single suit builder','court card builder','number card run','joker builder'][Math.floor(Math.random()*6)]]);
+      }
+      const inferredType = rankEl ? inferCardType(rankEl.value) : 'none';
+      if(typeEl && typeEl.value === 'none' && inferredType !== 'none') typeEl.value = inferredType;
+      if(rankEl && jokerEl && rankEl.value === 'joker' && jokerEl.value === 'none') jokerEl.value = ['luxury jester','dark carnival joker','glam joker queen','abstract joker artifact','theatrical chaos joker','collectible joker poster-card'][Math.floor(Math.random()*6)];
+      if(rankEl && numberEl && numericRanks.includes(rankEl.value) && numberEl.value === 'none') numberEl.value = ['illustrated suit tableau','character-led number card','symbolic number scene','ornamental number card','luxury collectible number card'][Math.floor(Math.random()*5)];
+    }
+
+    function createLocks(){
+      styleLocks.forEach(lock=>{
+        const btn = document.createElement('button');
+        btn.className = 'chip';
+        btn.type = 'button';
+        btn.textContent = lock;
+        btn.addEventListener('click',()=>{
+          if(selectedLocks.has(lock)) selectedLocks.delete(lock); else selectedLocks.add(lock);
+          renderLocks();
+          applyLocks();
+        });
+        styleLocksEl.appendChild(btn);
+      });
+    }
+
+    function renderLocks(){
+      [...styleLocksEl.children].forEach(btn=>btn.classList.toggle('active', selectedLocks.has(btn.textContent)));
+    }
+
+    function createPresets(){
+      presets.forEach(name=>{
+        const btn = document.createElement('button');
+        btn.className = 'preset';
+        btn.type = 'button';
+        btn.textContent = name;
+        btn.addEventListener('click',()=>applyPreset(name));
+        presetWrap.appendChild(btn);
+      });
+    }
+
+    const numericRanks = ['2','3','4','5','6','7','8','9','10'];
+    const allRanks = ['ace','2','3','4','5','6','7','8','9','10','jack','queen','king','joker'];
+
+    function inferCardType(rank){
+      if(numericRanks.includes(rank)) return 'illustrated number card';
+      if(rank === 'joker') return 'joker portrait';
+      if(rank === 'ace') return 'ace portrait';
+      if(['jack','queen','king'].includes(rank)) return 'face card portrait';
+      return 'none';
+    }
+
+    function applyPreset(name){
+      selectedPreset = name;
+      [...presetWrap.children].forEach(btn=>btn.classList.toggle('active', btn.textContent === name));
+      document.getElementById('customConcept').value = name;
+      selectedLocks.clear();
+      (presetLockMap[name] || []).forEach(lock=>selectedLocks.add(lock));
+      renderLocks();
+      clearSelections(false);
+      applyLocks();
+
+      const n = name.toLowerCase();
+      const setValue = (id,val)=>{ const el=document.getElementById(id); if(el && el.querySelector(`option[value="${val}"]`)) el.value=val; };
+      if(n.includes('queen') || n.includes('empress') || n.includes('muse') || n.includes('princess') || n.includes('siren')) setValue('gender','female');
+      if(n.includes('king') || n.includes('boss') || n.includes('maverick')) setValue('gender','male');
+      if(n.includes('duo') || n.includes('pair')) setValue('duo','royal duo portrait');
+      if(n.includes('heart')) setValue('suitTheme','hearts');
+      if(n.includes('spade')) setValue('suitTheme','spades');
+      if(n.includes('diamond')) setValue('suitTheme','diamonds');
+      if(n.includes('club')) setValue('suitTheme','clubs');
+      if(n.includes('ace')) setValue('cardRank','ace');
+      if(n.includes('queen')) setValue('cardRank','queen');
+      if(n.includes('king')) setValue('cardRank','king');
+      if(n.includes('joker')) setValue('cardRank','joker');
+      const rank = document.getElementById('cardRank').value;
+      const inferredType = inferCardType(rank);
+      if(inferredType !== 'none') setValue('cardType', inferredType);
+      if(rank === 'joker') setValue('jokerStyle', 'luxury jester');
+      if(numericRanks.includes(rank)) setValue('numberArt', 'luxury collectible number card');
+    }
+
+    function syncDeckFoundationSelections(){
+      const rankEl = document.getElementById('cardRank');
+      const typeEl = document.getElementById('cardType');
+      const jokerEl = document.getElementById('jokerStyle');
+      const numberEl = document.getElementById('numberArt');
+      const deckEl = document.getElementById('deckMode');
+      const rank = rankEl ? rankEl.value : 'none';
+      if(typeEl && typeEl.value === 'none'){
+        const inferred = inferCardType(rank);
+        if(inferred !== 'none') typeEl.value = inferred;
+      }
+      if(jokerEl && rank !== 'joker') jokerEl.value = 'none';
+      if(numberEl && !numericRanks.includes(rank)) numberEl.value = 'none';
+      if(deckEl && deckEl.value === 'none' && numericRanks.includes(rank)) deckEl.value = 'number card run';
+    }
+
+    function enforceDeckSafety(){
+      const rank = document.getElementById('cardRank').value;
+      const typeEl = document.getElementById('cardType');
+      const jokerEl = document.getElementById('jokerStyle');
+      const numberEl = document.getElementById('numberArt');
+      if(rank === 'joker'){
+        if(typeEl) typeEl.value = typeEl.value === 'none' ? 'joker portrait' : typeEl.value;
+        if(jokerEl && jokerEl.value === 'none') jokerEl.value = 'luxury jester';
+      }
+      if(numericRanks.includes(rank)){
+        if(typeEl && !['illustrated number card'].includes(typeEl.value)) typeEl.value = 'illustrated number card';
+        if(numberEl && numberEl.value === 'none') numberEl.value = 'luxury collectible number card';
+      }
+      if(['jack','queen','king'].includes(rank)){
+        if(typeEl && typeEl.value === 'none') typeEl.value = 'face card portrait';
+      }
+      if(rank === 'ace' && typeEl && typeEl.value === 'none') typeEl.value = 'ace portrait';
+    }
+
+    function clearSelections(clearConcept=true){
+      controls.forEach(c=>setSelectedValues(c.id, []));
+      if(clearConcept) document.getElementById('customConcept').value='';
+    }
+
+    function applyLocks(){
+      const setValue = (id,val)=>{ const el = document.getElementById(id); if(el && val && [...el.options].some(o=>o.value===val) && getSelectedValues(id).length===0) setSelectedValues(id, [val]); };
+      selectedLocks.forEach(lock=>{
+        const rule = lockRules[lock];
+        if(!rule) return;
+        Object.entries(rule).forEach(([id,val])=>setValue(id,val));
+      });
+    }
+
+    function optionMatchesSuit(option, selectedSuit){
+      if(!selectedSuit) return true;
+      const lower = String(option).toLowerCase();
+      const suitTerms = {
+        hearts:['heart','hearts'],
+        spades:['spade','spades'],
+        diamonds:['diamond','diamonds'],
+        clubs:['club','clubs']
+      };
+      const allTerms = Object.entries(suitTerms).flatMap(([suit, terms]) => terms.map(term => ({ suit, term })));
+      const matched = allTerms.find(({ term }) => lower.includes(term));
+      return !matched || matched.suit === selectedSuit;
+    }
+
+    function filterPoolForCoherence(controlId, pool, gender, selectedSuit){
+      let filtered = [...pool];
+      if(controlId === 'wardrobe'){
+        if(gender === 'male') filtered = filtered.filter(x => !genderRestricted.femaleOnly.wardrobe.includes(x));
+        if(gender === 'female') filtered = filtered.filter(x => !genderRestricted.maleOnly.wardrobe.includes(x));
+      }
+      if(controlId === 'footwear'){
+        if(gender === 'male') filtered = filtered.filter(x => !genderRestricted.femaleOnly.footwear.includes(x));
+        if(gender === 'female') filtered = filtered.filter(x => !genderRestricted.maleOnly.footwear.includes(x));
+      }
+      if(controlId === 'makeup'){
+        if(gender === 'male') filtered = filtered.filter(x => !genderRestricted.femaleOnly.makeup.includes(x));
+        if(gender === 'female') filtered = filtered.filter(x => !genderRestricted.maleOnly.makeup.includes(x));
+      }
+      if(!['gender','ethnicity','duo','deckMode','cardRank','cardType','jokerStyle','numberArt','suitTheme','hairColor','framing','finish','lighting','pose'].includes(controlId)){
+        const suitFiltered = filtered.filter(x => optionMatchesSuit(x, selectedSuit));
+        if(suitFiltered.length) filtered = suitFiltered;
+      }
+      return filtered;
+    }
+
+    function sanitizeSelections(){
+      syncDeckFoundationSelections();
+      const gender = getPrimaryValue('gender');
+      const selectedSuit = getPrimaryValue('suitTheme') !== 'none' ? getPrimaryValue('suitTheme') : '';
+      const rankEl = document.getElementById('cardRank');
+      const deckEl = document.getElementById('deckMode');
+      const typeEl = document.getElementById('cardType');
+      const jokerEl = document.getElementById('jokerStyle');
+      const numberEl = document.getElementById('numberArt');
+
+      if(getPrimaryValue('cardRank') === 'none') {
+        const rankPool = ['ace','2','3','4','5','6','7','8','9','10','jack','queen','king','joker'];
+        setSelectedValues('cardRank', [rankPool[Math.floor(Math.random()*rankPool.length)]]);
+      }
+      if(getPrimaryValue('deckMode') === 'none') {
+        setSelectedValues('deckMode', [['single featured card','full deck builder','single suit builder','court card builder','number card run','joker builder'][Math.floor(Math.random()*6)]]);
+      }
+      const inferredType = inferCardType(getPrimaryValue('cardRank'));
+      if(getPrimaryValue('cardType') === 'none' && inferredType !== 'none') setSelectedValues('cardType', [inferredType]);
+      if(getPrimaryValue('cardRank') === 'joker' && getPrimaryValue('jokerStyle') === 'none') setSelectedValues('jokerStyle', [['luxury jester','dark carnival joker','glam joker queen','abstract joker artifact','theatrical chaos joker','collectible joker poster-card'][Math.floor(Math.random()*6)]]);
+      if(numericRanks.includes(getPrimaryValue('cardRank')) && getPrimaryValue('numberArt') === 'none') setSelectedValues('numberArt', [['illustrated suit tableau','character-led number card','symbolic number scene','ornamental number card','luxury collectible number card'][Math.floor(Math.random()*5)]]);
+
+      controls.forEach(c=>{
+        const el = document.getElementById(c.id);
+        if(!el || getSelectedValues(c.id).length === 0) return;
+        let pool = filterPoolForCoherence(c.id, c.options.slice(1), gender, selectedSuit);
+        const allowed = new Set(pool);
+        if(c.id === 'wardrobe' || c.id === 'footwear' || c.id === 'makeup' || !['gender','ethnicity','duo','deckMode','cardRank','cardType','jokerStyle','numberArt','suitTheme','hairColor','framing','finish','lighting','pose'].includes(c.id)){
+          const kept = getSelectedValues(c.id).filter(v=>allowed.has(v));
+          setSelectedValues(c.id, kept);
+        }
+      });
+      enforceDeckSafety();
+    }
+
+    function randomize(){
+      clearSelections(false);
+      applyLocks();
+
+      const suitEl = document.getElementById('suitTheme');
+      if(getPrimaryValue('suitTheme') === 'none'){
+        let suitPool = ['hearts','spades','diamonds','clubs'];
+        if(selectedLocks.has('Ice Queen Clubs')) suitPool = ['clubs'];
+        if(selectedLocks.has('HeritageDiamondQueen') || selectedLocks.has('Heritage Diamond Queen')) suitPool = ['diamonds'];
+        if(selectedLocks.has('Sacred Hearts Royalty') || selectedLocks.has('Wonderland Hearts')) suitPool = ['hearts'];
+        if(selectedLocks.has('Gothic Spade Royalty') || selectedLocks.has('Cosmic Suit Art')) suitPool = ['spades'];
+        setSelectedValues('suitTheme', [suitPool[Math.floor(Math.random()*suitPool.length)] || 'hearts']);
+      }
+
+      const rankEl = document.getElementById('cardRank');
+      const deckEl = document.getElementById('deckMode');
+      const typeEl = document.getElementById('cardType');
+      const jokerEl = document.getElementById('jokerStyle');
+      const numberEl = document.getElementById('numberArt');
+
+      if(getPrimaryValue('cardRank') === 'none') {
+        const rankPool = ['ace','2','3','4','5','6','7','8','9','10','jack','queen','king','joker'];
+        setSelectedValues('cardRank', [rankPool[Math.floor(Math.random()*rankPool.length)]]);
+      }
+      if(getPrimaryValue('deckMode') === 'none') {
+        setSelectedValues('deckMode', [['single featured card','full deck builder','single suit builder','court card builder','number card run','joker builder'][Math.floor(Math.random()*6)]]);
+      }
+      const inferredType = inferCardType(getPrimaryValue('cardRank'));
+      if(getPrimaryValue('cardType') === 'none' && inferredType !== 'none') setSelectedValues('cardType', [inferredType]);
+      if(getPrimaryValue('cardRank') === 'joker' && getPrimaryValue('jokerStyle') === 'none') setSelectedValues('jokerStyle', [['luxury jester','dark carnival joker','glam joker queen','abstract joker artifact','theatrical chaos joker','collectible joker poster-card'][Math.floor(Math.random()*6)]]);
+      if(numericRanks.includes(getPrimaryValue('cardRank')) && getPrimaryValue('numberArt') === 'none') setSelectedValues('numberArt', [['illustrated suit tableau','character-led number card','symbolic number scene','ornamental number card','luxury collectible number card'][Math.floor(Math.random()*5)]]);
+
+      controls.forEach(c=>{
+        const el = document.getElementById(c.id);
+        if(getSelectedValues(c.id).length) return;
+        const gender = getPrimaryValue('gender');
+        const selectedSuit = getPrimaryValue('suitTheme') !== 'none' ? getPrimaryValue('suitTheme') : '';
+        let pool = c.options.slice(1);
+        pool = filterPoolForCoherence(c.id, pool, gender, selectedSuit);
+        if(selectedLocks.has('Royal Duo Portrait') && c.id === 'duo') pool = ['royal duo portrait','king and queen pair card'];
+        if(selectedLocks.has('Boss Ace Glam') && c.id === 'cardRank') pool = ['ace'];
+        if(c.id === 'cardType' && inferCardType(getPrimaryValue('cardRank')) !== 'none') pool = [inferCardType(getPrimaryValue('cardRank'))];
+        if(c.id === 'jokerStyle' && getPrimaryValue('cardRank') === 'joker') pool = ['luxury jester','dark carnival joker','glam joker queen','abstract joker artifact','theatrical chaos joker','collectible joker poster-card'];
+        if(c.id === 'numberArt' && numericRanks.includes(getPrimaryValue('cardRank'))) pool = ['illustrated suit tableau','character-led number card','symbolic number scene','ornamental number card','luxury collectible number card'];
+        if(selectedLocks.has('Ice Queen Clubs') && c.id === 'suitTheme') pool = ['clubs'];
+        if(selectedLocks.has('Heritage Diamond Queen') && c.id === 'suitTheme') pool = ['diamonds'];
+        if(selectedLocks.has('Sacred Hearts Royalty') && c.id === 'suitTheme') pool = ['hearts'];
+        if(selectedLocks.has('Wonderland Hearts') && c.id === 'suitTheme') pool = ['hearts'];
+        if(selectedLocks.has('Gothic Spade Royalty') && c.id === 'suitTheme') pool = ['spades'];
+        if(selectedLocks.has('Cosmic Suit Art') && c.id === 'suitTheme') pool = ['spades'];
+        if(!pool.length) pool = filterPoolForCoherence(c.id, c.options.slice(1), gender, selectedSuit);
+        if(!pool.length) pool = c.options.slice(1);
+        // Card Purity Mode filter — suppress conflicting options when clean or decorative-only
+        const purityMode = document.getElementById('cardPurity')?.value || 'clean main card only';
+        if(purityMode === 'clean main card only' || purityMode === 'main card + decorative suits'){
+          if(c.id === 'interaction') pool = pool.filter(x => !cardPurityForbiddenInteractions.has(x));
+          if(c.id === 'prop') pool = pool.filter(x => !cardPurityForbiddenProps.has(x));
+          if(c.id === 'casinoProp') pool = pool.filter(x => !cardPurityForbiddenCasinoProps.has(x));
+          if(c.id === 'scene') pool = pool.filter(x => !cardPurityForbiddenScenes.has(x));
+          if(!pool.length) pool = c.options.slice(1);
+        }
+        setSelectedValues(c.id, [pool[Math.floor(Math.random()*pool.length)] || 'none']);
+      });
+
+      sanitizeSelections();
+      enforceDeckSafety();
+    }
+
+    
+    const phase3StandaloneIds = ['refBehavior','duoRole','cardDensity','cardPurity'];
+    const suitCycle = ['hearts','spades','diamonds','clubs'];
+    const courtCycle = ['jack','queen','king'];
+
+    function getStandaloneSelections(){
+      return {
+        refBehavior: document.getElementById('refBehavior')?.value || 'none',
+        duoRole: document.getElementById('duoRole')?.value || 'none',
+        cardDensity: document.getElementById('cardDensity')?.value || 'none',
+        cardPurity: document.getElementById('cardPurity')?.value || 'clean main card only'
+      };
+    }
+
+    function buildReferenceBehaviorInstruction(mode){
+      const map = {
+        'preserve face only':"preserve the reference subject's face only, keep facial identity and key features locked while allowing the rest of the styling to change",
+        'preserve face and hairstyle':"preserve the reference subject's face and hairstyle, maintain facial identity and hair silhouette",
+        'preserve face and body type':"preserve the reference subject's face and body type, maintain overall silhouette without replacing the subject",
+        'preserve full likeness':'preserve the full likeness of the reference subject, keep the uploaded person as the main character and do not genericize the face',
+        'use photo as inspiration only':'use the reference photo as inspiration only, do not force exact likeness'
+      };
+      return map[mode] || '';
+    }
+
+    function buildDuoRoleInstruction(mode){
+      const map = {
+        'mirrored same-character duo':'treat the duo as a mirrored same-character composition with clear intentional mirroring, not accidental duplicate confusion',
+        'king and queen contrast duo':'build a true king-and-queen contrast duo with distinct masculine and feminine card identities while keeping the same deck family',
+        'masculine pair duo':'build a masculine pair duo with matched masculine styling and no feminine wardrobe drift unless explicitly selected',
+        'feminine pair duo':'build a feminine pair duo with matched feminine styling and no masculine wardrobe drift unless explicitly selected',
+        'contrast fashion duo':'build a contrast fashion duo with clearly different but visually cohesive styling roles'
+      };
+      return map[mode] || '';
+    }
+
+    function buildCardDensityInstruction(mode){
+      const map = {
+        'minimal decorative cards':'keep decorative extra cards minimal and secondary so the primary visible card identity stays dominant; no inset mini-cards, no overlapping mini playing cards, no corner sample cards, and no duplicate support cards pasted onto the main card unless explicitly required by the selected concept',
+        'balanced decorative cards':'use balanced decorative extra cards without letting them overpower the main card identity; avoid inset mini-cards and avoid duplicate sample-card overlays unless clearly required by the chosen concept',
+        'maximal card fantasy':'allow maximal decorative card fantasy while keeping the primary visible printed card identity readable; do not use random inset mini-cards or duplicate sample-card overlays that confuse the main card identity'
+      };
+      return map[mode] || '';
+    }
+
+    // ==== Card Purity Mode (addition-only) ====
+    const cardPurityForbiddenInteractions = new Set([
+      'holding a giant ace card','touching floating cards','wrapped in swirling cards',
+      'holding a transparent card umbrella','fanning cards dramatically','leaning against a giant card',
+      'emerging from stacked cards','holding a custom face card portrait','presenting a single royal card',
+      'holding a flaming fan of cards','posed beside a luxury crystal ace','emerging from a giant stacked deck',
+      'exploding out from a hand-held deck','emerging from a stacked deck frame','seated against oversized aces',
+      'framed by a fan of cards','posed as a two-card royal pair'
+    ]);
+    const cardPurityForbiddenProps = new Set([
+      'flaming cards','crystal ace card','royal portrait card','stacked deck','card fan halo'
+    ]);
+    const cardPurityForbiddenCasinoProps = new Set([
+      'stacked deck','floating deck fan'
+    ]);
+    const cardPurityForbiddenScenes = new Set([
+      'floating in a storm of playing cards','standing atop a stacked card tower'
+    ]);
+
+    function buildCardPurityInstruction(mode, picks){
+      const rank = picks.cardRank || '';
+      const suit = picks.suitTheme || '';
+      const cardId = (rank && suit) ? `${rank} of ${suit}` : (rank || 'the selected card');
+      const suitOnly = suit || 'the selected suit';
+      const duoAddon = picks.duo ? ` if a duo composition is active, both main visible card panels must still remain on the exact same ${cardId}; do not let one panel drift to a different rank or a different suit; no mixed-rank or mixed-suit duo pair` : '';
+      const map = {
+        'clean main card only': `CARD PURITY LOCK — clean main card only: the ${cardId} must be the only primary featured playing-card identity in the image; do not show held playing cards; do not show inset mini-cards; do not show alternate support cards; do not show a second printed card with a different rank; do not show a second printed card with a different suit; do not show prop cards that display a different rank or suit; do not duplicate the featured card as competing sample cards; keep the main visible card locked to the selected rank and selected suit; decorative suit symbols are allowed only if they do not create a second playable-card identity${duoAddon}`,
+        'main card + decorative suits': `CARD PURITY LOCK — main card plus decorative suits only: allow decorative ${suitOnly} suit motifs and background suit symbolism only; do not show a second printed card with a different rank; do not show a handheld alternate playing card; do not show inset mini-cards with different labels; the ${cardId} remains the only primary playable-card identity${duoAddon}`,
+        'main card + support cards': `CARD PURITY LOCK — main card plus matched support cards: any support cards must stay visually secondary to the ${cardId}; support cards must match the same ${suitOnly} suit family; support cards must not override or replace the selected rank identity; do not allow support cards to conflict with or compete with the selected ${cardId}${duoAddon}`
+      };
+      return map[mode] || map['clean main card only'];
+    }
+
+    function cycleRank(direction='next'){
+      const rankEl = document.getElementById('targetRank');
+      const current = rankEl.value === 'none' ? (document.getElementById('cardRank').value || 'ace') : rankEl.value;
+      const idx = allRanks.indexOf(current);
+      const nextIdx = idx === -1 ? 0 : (direction === 'next' ? (idx + 1) % allRanks.length : (idx - 1 + allRanks.length) % allRanks.length);
+      rankEl.value = allRanks[nextIdx];
+    }
+
+    function cycleSuit(){
+      const suitEl = document.getElementById('targetSuit');
+      const current = suitEl.value === 'none' ? (document.getElementById('suitTheme').value || 'hearts') : suitEl.value;
+      const idx = suitCycle.indexOf(current);
+      const nextIdx = idx === -1 ? 0 : (idx + 1) % suitCycle.length;
+      suitEl.value = suitCycle[nextIdx];
+    }
+
+    function quickWorkflow(action){
+      const targetRankEl = document.getElementById('targetRank');
+      const targetSuitEl = document.getElementById('targetSuit');
+      const targetDeckModeEl = document.getElementById('targetDeckMode');
+      const mainRankEl = document.getElementById('cardRank');
+      const mainSuitEl = document.getElementById('suitTheme');
+      const mainDeckModeEl = document.getElementById('deckMode');
+      const outputHasPrompt = output && output.textContent && !output.textContent.includes('Your generated prompt will land here.');
+
+      if(!outputHasPrompt) generatePrompt();
+      if(!lockedStyle) lockCurrentStyle();
+
+      if(action === 'next-rank') cycleRank('next');
+      if(action === 'different-suit') cycleSuit();
+      if(action === 'court-cards') {
+        targetDeckModeEl.value = 'court card builder';
+        targetRankEl.value = courtCycle[Math.floor(Math.random()*courtCycle.length)];
+      }
+      if(action === 'number-cards') {
+        targetDeckModeEl.value = 'number card run';
+        targetRankEl.value = numericRanks[Math.floor(Math.random()*numericRanks.length)];
+      }
+      if(action === 'joker-style') {
+        targetDeckModeEl.value = 'joker builder';
+        targetRankEl.value = 'joker';
+      }
+      if(action === 'full-suit') {
+        targetDeckModeEl.value = 'single suit builder';
+        if(targetSuitEl.value === 'none') targetSuitEl.value = mainSuitEl.value !== 'none' ? mainSuitEl.value : 'hearts';
+      }
+
+      if(targetSuitEl.value !== 'none') mainSuitEl.value = targetSuitEl.value;
+      if(targetDeckModeEl.value !== 'none') mainDeckModeEl.value = targetDeckModeEl.value;
+      if(targetRankEl.value !== 'none') {
+        mainRankEl.value = targetRankEl.value;
+        const next = syncTargetTypeFromRank(targetRankEl.value);
+        Object.entries(next).forEach(([id,val])=>{
+          const el = document.getElementById(id);
+          if(el && [...el.options].some(o=>o.value===val)) el.value = val;
+        });
+      }
+
+      sanitizeSelections();
+      enforceDeckSafety();
+      applyLockedStyle(true);
+      setTimeout(()=>output?.scrollIntoView({behavior:'smooth', block:'center'}), 40);
+    }
+
+function buildCardLabelInstruction(picks){
+      if(!picks.cardRank && !picks.suitTheme) return '';
+      const suitNames = { hearts:'Hearts', spades:'Spades', diamonds:'Diamonds', clubs:'Clubs' };
+      const suitGlyphs = { hearts:'♥', spades:'♠', diamonds:'♦', clubs:'♣' };
+      const rankNames = { ace:'Ace', jack:'Jack', queen:'Queen', king:'King', joker:'Joker', '2':'2', '3':'3', '4':'4', '5':'5', '6':'6', '7':'7', '8':'8', '9':'9', '10':'10' };
+      const rankGlyphs = { ace:'A', jack:'J', queen:'Q', king:'K', joker:'JOKER', '2':'2', '3':'3', '4':'4', '5':'5', '6':'6', '7':'7', '8':'8', '9':'9', '10':'10' };
+      const rankKey = picks.cardRank || '';
+      const suitKey = picks.suitTheme || '';
+      const rankName = rankNames[rankKey] || rankKey;
+      const suitName = suitNames[suitKey] || suitKey;
+      const rankGlyph = rankGlyphs[rankKey] || rankName;
+      const suitGlyph = suitGlyphs[suitKey] || '';
+      const isJoker = rankKey === 'joker';
+      const isNumber = numericRanks.includes(rankKey);
+      const cardName = isJoker ? 'Joker' : (suitName ? `${rankName} of ${suitName}` : rankName);
+      const cardMark = isJoker ? 'JOKER' : (suitGlyph ? `${rankGlyph}${suitGlyph}` : rankGlyph);
+      const duoRule = picks.duo ? ` for a duo composition, every primary visible card panel must still stay on the exact same ${cardName}; both visible feature cards must match each other exactly in rank and suit; do not change one panel to another suit, and do not mix different suits across the paired cards` : '';
+      const suitOnlyRule = (!isJoker && suitName) ? ` show only ${suitName} suit symbols on the main visible cards and any featured secondary cards; suppress off-suit cards, off-suit corner marks, off-suit floating cards, and off-suit background card art; do not show hearts, spades, diamonds, or clubs unless they match the selected suit` : '';
+      const rankOnlyRule = rankName ? ` keep the featured card identity locked to ${cardName}; do not let the scene drift into another rank or another face-card identity` : '';
+      const numberRule = isNumber ? ` this is an illustrated number card, not a plain face-card portrait; the visible card must clearly read ${cardName}, keep a collectible card layout, weave the suit symbolism into the art, keep the number-card identity readable, use one main finished card design only, and do not add inset mini-cards, duplicate sample cards, or extra overlay cards on top of the artwork unless the user explicitly asked for that look` : '';
+      const jokerRule = isJoker ? ` the visible card must read JOKER on the actual printed card, use a true joker card identity, and do not convert the printed card into an ace, king, queen, jack, or number card` : '';
+      return `the actual visible playing card must be correctly printed as the ${cardName}, with clear ${cardMark} corner indices, the correct ${isJoker ? 'joker labeling' : `${suitName} suit symbols`} on the card itself, and readable printed card labeling built into the card design, not implied or missing.${duoRule}.${suitOnlyRule}.${rankOnlyRule}.${numberRule}.${jokerRule}`.replace(/\.\./g,'.');
+    }
+
+    function buildDeckModeInstruction(picks){
+      if(!picks.deckMode) return '';
+      const map = {
+        'single featured card':'focus on one finished collectible card image only',
+        'full deck builder':'treat this card as part of a full collectible illustrated deck family with deck-consistent styling',
+        'single suit builder':'treat this card as part of a single-suit deck family and keep the suit identity dominant',
+        'court card builder':'treat this as a court-card family look with deck-consistent royal styling',
+        'number card run':'treat this as part of a 2-through-10 illustrated number-card sequence with matched deck styling',
+        'joker builder':'treat this as part of the joker branch of the deck and keep the joker identity unmistakable'
+      };
+      return map[picks.deckMode] || '';
+    }
+
+    function buildCardTypeInstruction(picks){
+      if(!picks.cardType) return '';
+      const map = {
+        'illustrated number card':'build this as an illustrated number card with readable printed rank and suit, collectible layout balance, and art woven into the number-card identity',
+        'face card portrait':'build this as a royal face-card portrait with strong printed card framing and clear court-card identity',
+        'ace portrait':'build this as an ace portrait card with the ace identity visibly printed on the card itself',
+        'ace symbol card':'build this as an ace symbol card where the ace graphic identity leads the composition while the printed card stays readable',
+        'joker portrait':'build this as a joker portrait card with theatrical joker energy and true printed joker labeling',
+        'joker abstract':'build this as an abstract joker card while keeping the printed joker identity unmistakable'
+      };
+      return map[picks.cardType] || '';
+    }
+
+    function buildDeckSafetyInstruction(picks){
+      const suitName = picks.suitTheme ? picks.suitTheme : '';
+      if(!suitName && picks.cardRank !== 'joker') return '';
+      if(picks.cardRank === 'joker') return 'deck-safe joker logic only, no accidental suit swap, no off-rank drift, no fake ace or queen conversion';
+      return `deck-safe suit logic only, keep ${suitName} as the single active suit family for the printed card and any featured support cards, no accidental off-suit card faces, no mixed-suit corner marks, no inset mini-cards showing a different card identity, and no secondary card panels switching away from ${suitName}`;
+    }
+
+
+    function applyPromptGlowState(){
+      const promptBox = document.getElementById('output');
+      const btn = document.getElementById('promptGlowBtn');
+      if(promptBox) promptBox.classList.toggle('glow-on', !!promptGlowOn);
+      if(btn) btn.textContent = promptGlowOn ? 'Self Glow On' : 'Self Glow Off';
+      localStorage.setItem('houseOfCardsPromptGlow', JSON.stringify(!!promptGlowOn));
+    }
+
+    function applyHistoryGlowState(){
+      if(historyEl) historyEl.classList.toggle('history-glow', !!historyGlowOn);
+      const btn = document.getElementById('historyGlowBtn');
+      if(btn) btn.textContent = historyGlowOn ? 'History Glow On' : 'History Glow Off';
+      localStorage.setItem('houseOfCardsHistoryGlow', JSON.stringify(!!historyGlowOn));
+    }
+
+    function copyLatestHistory(){
+      const items = JSON.parse(localStorage.getItem('houseOfCardsHistory') || '[]');
+      if(!items.length){ alert('No saved prompts yet.'); return; }
+      navigator.clipboard.writeText(items[0].text || '');
+    }
+
+    function clearPromptHistory(){
+      localStorage.removeItem('houseOfCardsHistory');
+      renderHistory();
+    }
+
+    function scrollToTopSmooth(){ window.scrollTo({top:0, behavior:'smooth'}); }
+    function scrollToBottomSmooth(){ window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); }
+
+    function updateScrollButtons(){
+      const topBtn = document.getElementById('scrollTopBtn');
+      const bottomBtn = document.getElementById('scrollBottomBtn');
+      if(!topBtn || !bottomBtn) return;
+      const y = window.scrollY || window.pageYOffset;
+      const maxY = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight) - window.innerHeight;
+      topBtn.classList.toggle('hidden', y < 220);
+      bottomBtn.classList.toggle('hidden', y > maxY - 220);
+    }
+
+    function generatePrompt(){
+      sanitizeSelections();
+      enforceDeckSafety();
+      const primaryPicks = Object.fromEntries(controls.map(c=>[c.id, getPrimaryValue(c.id)]).filter(([,v])=>v && v!=='none'));
+      const promptSelections = getPromptSelections();
+      const standalone = getStandaloneSelections();
+      const parts = [];
+      if(document.getElementById('customConcept').value.trim()) parts.push(document.getElementById('customConcept').value.trim());
+      if(primaryPicks.ethnicity) parts.push(`${normalizePromptValue(promptSelections.ethnicity)}, preserve ethnic features, authentic skin tone rendering, natural facial structure, culturally consistent beauty details`);
+      if(primaryPicks.gender) parts.push(normalizePromptValue(promptSelections.gender));
+      if(primaryPicks.duo) parts.push(normalizePromptValue(promptSelections.duo));
+      if(primaryPicks.cardRank || primaryPicks.suitTheme) parts.push(`${primaryPicks.cardRank || ''} of ${primaryPicks.suitTheme || 'cards'}`.trim());
+      const deckModeInstruction = buildDeckModeInstruction(primaryPicks);
+      if(deckModeInstruction) parts.push(deckModeInstruction);
+      const cardTypeInstruction = buildCardTypeInstruction(primaryPicks);
+      if(cardTypeInstruction) parts.push(cardTypeInstruction);
+      const cardLabelInstruction = buildCardLabelInstruction(primaryPicks);
+      if(cardLabelInstruction) parts.push(cardLabelInstruction);
+      const deckSafetyInstruction = buildDeckSafetyInstruction(primaryPicks);
+      if(deckSafetyInstruction) parts.push(deckSafetyInstruction);
+      const styleCarryoverInstruction = buildStyleCarryoverInstruction(primaryPicks);
+      if(styleCarryoverInstruction) parts.push(styleCarryoverInstruction);
+      const duoRoleInstruction = buildDuoRoleInstruction(standalone.duoRole);
+      if(duoRoleInstruction) parts.push(duoRoleInstruction);
+      const cardDensityInstruction = buildCardDensityInstruction(standalone.cardDensity);
+      if(cardDensityInstruction) parts.push(cardDensityInstruction);
+      const cardPurityInstruction = buildCardPurityInstruction(standalone.cardPurity, primaryPicks);
+      if(cardPurityInstruction) parts.push(cardPurityInstruction);
+      ['suitSymbol','archetype','cultural','scene','breakout','cardFrame','wardrobe','footwear','crown','hairStyle','hairColor','makeup','jewelry','prop','casinoProp','throne','interaction','motion','background','lighting','palette','mood','pose','framing','finish','jokerStyle','numberArt'].forEach(id=>{
+        const value = normalizePromptValue(promptSelections[id]);
+        if(value && value !== 'none') parts.push(value);
+      });
+      if(selectedLocks.size) parts.push(`style locks: ${[...selectedLocks].join(', ')}`);
+      if(refOn && refName) {
+        parts.push(`reference photo attached, preserve facial identity and key features from reference`);
+        const refBehaviorInstruction = buildReferenceBehaviorInstruction(standalone.refBehavior);
+        if(refBehaviorInstruction) parts.push(refBehaviorInstruction);
+      }
+      parts.push('luxury playing-card fantasy, royal breakout drama, editorial card-world realism, premium cohesive storytelling, ultra-detailed, visually unforgettable, 9:16 vertical composition');
+      parts.push(negativeLock);
+      const final = parts.join(', ');
+      output.textContent = final;
+      saveHistory(final, false);
+    }
+
+    function saveHistory(text, alertUser=true){
+      if(!text || text === 'Your generated prompt will land here.') return;
+      const items = JSON.parse(localStorage.getItem('houseOfCardsHistory') || '[]');
+      items.unshift({text, when:new Date().toLocaleString()});
+      localStorage.setItem('houseOfCardsHistory', JSON.stringify(items.slice(0,18)));
+      renderHistory();
+      if(alertUser) alert('Prompt saved.');
+    }
+
+    function renderHistory(){
+      const items = JSON.parse(localStorage.getItem('houseOfCardsHistory') || '[]');
+      historyEl.innerHTML = '';
+      if(!items.length){ historyEl.innerHTML = '<div class="history-item glow-item"><small>No saved prompts yet.</small>Use Generate Prompt or Save Prompt.</div>'; applyHistoryGlowState(); return; }
+      items.forEach((item,index)=>{
+        const box = document.createElement('div');
+        box.className = 'history-item glow-item';
+        const text = item.text || '';
+        const clipped = text.length > 520 ? `${text.slice(0,520)}…` : text;
+        box.innerHTML = `<small>${item.when}</small><div>${clipped}</div>`;
+        const actions = document.createElement('div');
+        actions.className = 'history-actions';
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.textContent = index === 0 ? 'Copy Latest' : 'Copy This';
+        copyBtn.addEventListener('click', ()=>navigator.clipboard.writeText(text));
+        const loadBtn = document.createElement('button');
+        loadBtn.type = 'button';
+        loadBtn.textContent = 'Load To Prompt';
+        loadBtn.addEventListener('click', ()=>{ output.textContent = text; if(promptGlowOn) applyPromptGlowState(); window.scrollTo({top:output.getBoundingClientRect().top + window.scrollY - 110, behavior:'smooth'}); });
+        actions.appendChild(copyBtn);
+        actions.appendChild(loadBtn);
+        box.appendChild(actions);
+        historyEl.appendChild(box);
+      });
+      applyHistoryGlowState();
+    }
+
+    function copyPrompt(){
+      navigator.clipboard.writeText(output.textContent || '').then(()=>{
+        const btn = document.getElementById('copyBtn');
+        const old = btn.textContent;
+        btn.textContent = 'Copied';
+        setTimeout(()=>btn.textContent = old, 1300);
+      });
+    }
+
+    function initFloating(){
+      const bg = document.getElementById('floatingBg');
+      const symbols = ['♠','♥','♦','♣'];
+      for(let i=0;i<18;i++){
+        const el = document.createElement('div');
+        const isCard = i % 2 === 0;
+        el.className = isCard ? 'float-card' : 'float-suit';
+        el.textContent = isCard ? ['A♠','Q♥','K♦','J♣'][i%4] : symbols[i%4];
+        el.style.left = Math.random()*100 + 'vw';
+        el.style.animationDuration = (16 + Math.random()*18) + 's';
+        el.style.animationDelay = (-Math.random()*20) + 's';
+        el.style.fontSize = (isCard ? 32 + Math.random()*42 : 28 + Math.random()*28) + 'px';
+        bg.appendChild(el);
+      }
+    }
+
+
+    const genreOptions = ['cinematic pop','dark orchestral','luxury trap','epic trailer','dream pop','synthwave','gospel soul','dramatic hip-hop','electro glam','orchestral fantasy'];
+    const musicStyleOptions = ['royal','seductive','dark','ethereal','playful','theatrical','high-fashion','casino-luxe','wonderland','cathedral'];
+    const selectedGenres = new Set(['cinematic pop']);
+    const selectedMusicStyles = new Set(['royal']);
+    let musicVocalOn = true;
+    let musicInstrumentalOn = false;
+
+    function createMiniChips(containerId, options, selectedSet){
+      const wrap = document.getElementById(containerId);
+      if(!wrap) return;
+      wrap.innerHTML = '';
+      options.forEach(opt=>{
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'mini-chip' + (selectedSet.has(opt) ? ' active' : '');
+        btn.textContent = opt;
+        btn.addEventListener('click', ()=>{
+          if(selectedSet.has(opt)) selectedSet.delete(opt); else selectedSet.add(opt);
+          if(!selectedSet.size) selectedSet.add(opt);
+          createMiniChips(containerId, options, selectedSet);
+        });
+        wrap.appendChild(btn);
+      });
+    }
+
+    function syncRangeValue(rangeId, valueId){
+      const range = document.getElementById(rangeId);
+      const out = document.getElementById(valueId);
+      if(!range || !out) return;
+      out.textContent = range.value;
+      range.addEventListener('input', ()=> out.textContent = range.value);
+    }
+
+    function ensureBasePrompt(){
+      if(!output.textContent || output.textContent === 'Your generated prompt will land here.') generatePrompt();
+      return output.textContent || '';
+    }
+
+    function getDeckAwareContext(){
+      sanitizeSelections();
+      enforceDeckSafety();
+      const picks = Object.fromEntries(controls.map(c=>[c.id, document.getElementById(c.id).value]).filter(([,v])=>v && v!=='none'));
+      const standalone = getStandaloneSelections();
+      const prompt = ensureBasePrompt();
+      const rank = picks.cardRank || 'card';
+      const suit = picks.suitTheme || 'luxury suit';
+      const cardName = rank === 'joker' ? 'Joker' : `${rank}${picks.suitTheme ? ' of ' + picks.suitTheme : ''}`.trim();
+      const styleLabel = lockedStyle?.label || selectedPreset || 'current locked glamour style';
+      const deckMode = picks.deckMode || document.getElementById('targetDeckMode')?.value || 'single featured card';
+      const aesthetic = [picks.palette,picks.mood,picks.finish,picks.background,picks.lighting].filter(Boolean).join(', ');
+      return {picks, standalone, prompt, rank, suit, cardName, styleLabel, deckMode, aesthetic};
+    }
+
+    function generateVideoScript(){
+      const ctx = getDeckAwareContext();
+      const duoText = ctx.picks.duo ? 'Both featured subjects move in matched rhythm and keep the same deck-family styling.' : 'The featured subject owns the frame without losing the printed card identity.';
+      const script = [
+        `0–2 sec — Open on the ${ctx.styleLabel} look for the ${ctx.cardName}; push through smoke, glow, or card debris while the printed card frame stays readable.`,
+        `2–4 sec — Reveal the subject with ${ctx.picks.pose || 'editorial movement'} and ${ctx.picks.motion || 'luxury environmental motion'} while the ${ctx.suit} identity stays clear.`,
+        `4–6 sec — Let the card world react: subtle suit-symbol motion, border shimmer, and deck-consistent lighting carry the scene.`,
+        `6–8 sec — Land on a polished hero pose with the printed ${ctx.cardName} visible, then end on a loop-friendly shimmer or smoke pullback.`,
+        duoText
+      ].join('\n');
+      const motion = `8-second motion prompt: keep the ${ctx.styleLabel} deck family locked; animate ${ctx.cardName} with ${ctx.picks.motion || 'polished card-world motion'}, ${ctx.picks.lighting || 'cinematic glow'}, subtle border shimmer, readable printed card labeling, and a clean loop-ready finish.`;
+      document.getElementById('videoScriptOutput').textContent = script;
+      document.getElementById('motionOnlyOutput').textContent = motion;
+    }
+
+    function buildMusicTheme(ctx){
+      const locks = [...selectedLocks].join(', ');
+      return [ctx.styleLabel, ctx.cardName, ctx.picks.mood, ctx.picks.palette, locks].filter(Boolean).join(', ');
+    }
+
+    function generateMusic(){
+      const ctx = getDeckAwareContext();
+      const genres = [...selectedGenres].join(', ');
+      const styles = [...selectedMusicStyles].join(', ');
+      const weirdness = document.getElementById('weirdnessRange').value;
+      const styleInf = document.getElementById('styleInfluenceRange').value;
+      const audioInf = document.getElementById('audioInfluenceRange').value;
+      const theme = buildMusicTheme(ctx);
+      const vocalTag = musicVocalOn ? 'vocal-led' : 'minimal vocal';
+      const instrTag = musicInstrumentalOn ? 'include an instrumental-ready arrangement' : 'lyrics-forward arrangement';
+      const jingle = `Suno jingle prompt: ${genres}; ${styles}; ${vocalTag}; ${instrTag}; tied to ${theme}; make it catchy, luxurious, and deck-world specific; weirdness ${weirdness}, style influence ${styleInf}, audio influence ${audioInf}.`;
+      const thirty = `30-second song prompt: build around ${ctx.cardName} in the ${ctx.styleLabel} family; keep ${ctx.picks.suitTheme || 'suit'} identity and ${ctx.picks.mood || 'luxury fantasy'} energy clear; ${genres}; ${styles}; weirdness ${weirdness}, style influence ${styleInf}, audio influence ${audioInf}.`;
+      const sixty = `1-minute song prompt: expandable full-theme track for ${ctx.deckMode}; keep the same deck-family world, glamour level, and collectible-card energy as ${theme}; ${genres}; ${styles}; ${vocalTag}; ${instrTag}.`;
+      lyrics = (
+        `Title: ${ctx.styleLabel}\n`+
+        `Hook: ${ctx.cardName} in the spotlight, suit symbols glowing tonight.\n`+
+        `Verse: Velvet smoke, crystal light, deck-born glam in a royal night.\n`+
+        `Pre-hook: Hold the frame, hold the crown, let the card-world lay it down.\n`+
+        `Hook: ${ctx.cardName} in the spotlight, suit symbols glowing tonight.\n`+
+        `Bridge: Lock the style, build the deck, every card comes out correct.\n`+
+        `Outro: Same luxe family, same bold flame, every card remembers the name.`
+      )
+      instr = `Instrumental prompt: cinematic, no vocals, keep ${ctx.styleLabel} deck-family mood, ${ctx.picks.palette || 'luxury palette'} color-feel, ${ctx.picks.mood || 'editorial fantasy'} tension, and polished collectible-card energy.`;
+      document.getElementById('musicJingleOutput').textContent = jingle;
+      document.getElementById('music30Output').textContent = thirty;
+      document.getElementById('music60Output').textContent = sixty;
+      document.getElementById('musicLyricsOutput').textContent = lyrics + `\n\n${instr}`;
+    }
+
+    function marketingAngle(ctx){
+      return ctx.deckMode && ctx.deckMode !== 'single featured card'
+        ? 'build your own full illustrated luxury deck in one locked style'
+        : 'create luxury fantasy playing-card art that stops the scroll';
+    }
+
+    function generateMarketing(){
+      const ctx = getDeckAwareContext();
+      const angle = marketingAngle(ctx);
+      const family = ctx.styleLabel;
+      const caption = `This ${ctx.cardName} came out in the ${family} style and now the whole deck can follow that same look. ${angle}.`;
+      const hashtags = ['#AIArt','#PromptGenerator','#PlayingCardArt','#FantasyCardDesign','#LuxuryArt','#DeckDesign','#CardCreator','#DigitalProducts','#CreativeAI','#GlamAesthetic'].join(' ');
+      const seo = ['luxury playing card generator','illustrated fantasy card deck','AI card art prompts','custom deck design prompts',family.toLowerCase(),(ctx.cardName+' art').toLowerCase()].join(', ');
+      const cta = `Create one card you love, lock the style, and build the rest of the deck in that same family.`;
+      const email = `Subject: Build a whole luxury card deck from one fire style\n\nYou’re not stuck making one pretty card at a time. Generate a look you love, lock that style, and turn it into court cards, number cards, or a full suit without losing the visual family.`;
+      const tiktok = `Hook: I made one ${ctx.cardName} and turned it into a whole deck.\nBody: This generator lets you lock the style and keep the same luxury card world across the whole set.\nCTA: Tap the link and build your own deck.`;
+      const instagram = `Luxury fantasy card art, but make it deck-ready. Generate one style, lock it in, and build the rest of your deck without losing the vibe.`;
+      const pinterest = `Pin title: ${family} luxury card deck idea\nPin text: Turn one fantasy card concept into a full illustrated deck with matching style, borders, and glam energy.`;
+      const facebook = `If you’ve ever wanted to make a full fantasy playing-card deck without each card looking disconnected, this is the move. Start with one image, lock the style, and expand the full deck from that same visual family.`;
+      const youtube = `Video idea: I built a full luxury fantasy card deck from one locked style.\nDescription line: Generate a single card, save the look, then build court cards, number cards, and joker designs in the same collectible deck family.`;
+      const ad = `Headline: Build a full fantasy card deck from one locked style\nBody: Generate a luxury card look you love, keep the same deck family, and create number cards, court cards, and jokers without the style falling apart.`;
+      document.getElementById('captionOutput').textContent = caption;
+      document.getElementById('hashtagsOutput').textContent = hashtags;
+      document.getElementById('seoOutput').textContent = seo;
+      document.getElementById('ctaOutput').textContent = cta;
+      document.getElementById('emailOutput').textContent = email;
+      document.getElementById('tiktokOutput').textContent = tiktok;
+      document.getElementById('instagramOutput').textContent = instagram;
+      document.getElementById('pinterestOutput').textContent = pinterest;
+      document.getElementById('facebookOutput').textContent = facebook;
+      document.getElementById('youtubeOutput').textContent = youtube;
+      document.getElementById('adOutput').textContent = ad;
+    }
+
+    function copyElText(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      navigator.clipboard.writeText(el.textContent || '');
+    }
+
+    function copyAllMarketing(){
+      const ids = ['captionOutput','hashtagsOutput','seoOutput','ctaOutput','emailOutput','tiktokOutput','instagramOutput','pinterestOutput','facebookOutput','youtubeOutput','adOutput'];
+      const text = ids.map(id=>{
+        const label = document.querySelector(`[id="${id}"]`)?.previousElementSibling?.textContent || id;
+        return `${label}\n${document.getElementById(id).textContent}`;
+      }).join('\n\n');
+      navigator.clipboard.writeText(text);
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', generatePrompt);
+    document.getElementById('lockStyleBtn').addEventListener('click', lockCurrentStyle);
+    document.getElementById('saveStyleBtn').addEventListener('click', saveCurrentStyleSnapshot);
+    document.getElementById('applyLockedStyleBtn').addEventListener('click', ()=>applyLockedStyle(false));
+    document.getElementById('generateLockedStyleBtn').addEventListener('click', ()=>applyLockedStyle(true));
+    document.getElementById('loadStyleBtn').addEventListener('click', loadSavedStyleSnapshot);
+    document.getElementById('deleteStyleBtn').addEventListener('click', deleteSavedStyleSnapshot);
+    document.getElementById('deckConsistencyBtn').addEventListener('click', ()=>{
+      deckConsistencyOn = !deckConsistencyOn;
+      document.getElementById('deckConsistencyBtn').textContent = deckConsistencyOn ? 'Deck Consistency On' : 'Deck Consistency Off';
+      updateStyleSnapshotStatus();
+    });
+
+    document.getElementById('nextRankBtn').addEventListener('click', ()=>quickWorkflow('next-rank'));
+    document.getElementById('sameStyleDifferentSuitBtn').addEventListener('click', ()=>quickWorkflow('different-suit'));
+    document.getElementById('courtCardsBtn').addEventListener('click', ()=>quickWorkflow('court-cards'));
+    document.getElementById('numberCardsBtn').addEventListener('click', ()=>quickWorkflow('number-cards'));
+    document.getElementById('jokerThisStyleBtn').addEventListener('click', ()=>quickWorkflow('joker-style'));
+    document.getElementById('fullSuitThisStyleBtn').addEventListener('click', ()=>quickWorkflow('full-suit'));
+    ['refBehavior','duoRole','cardDensity'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.addEventListener('change', updateStyleSnapshotStatus);
+    });
+
+    document.getElementById('randomBtn').addEventListener('click', randomize);
+    document.getElementById('clearBtn').addEventListener('click', ()=>{ clearSelections(); selectedLocks.clear(); selectedPreset=''; [...presetWrap.children].forEach(x=>x.classList.remove('active')); renderLocks(); output.textContent='Your generated prompt will land here.'; });
+    document.getElementById('copyBtn').addEventListener('click', copyPrompt);
+    document.getElementById('saveBtn').addEventListener('click', ()=>saveHistory(output.textContent));
+    document.getElementById('promptGlowBtn').addEventListener('click', ()=>{ promptGlowOn = !promptGlowOn; applyPromptGlowState(); });
+    document.getElementById('historyGlowBtn').addEventListener('click', ()=>{ historyGlowOn = !historyGlowOn; applyHistoryGlowState(); });
+    document.getElementById('copyLatestHistoryBtn').addEventListener('click', copyLatestHistory);
+    document.getElementById('clearHistoryBtn').addEventListener('click', clearPromptHistory);
+    document.getElementById('scrollTopBtn').addEventListener('click', scrollToTopSmooth);
+    document.getElementById('scrollBottomBtn').addEventListener('click', scrollToBottomSmooth);
+    window.addEventListener('scroll', updateScrollButtons, {passive:true});
+    window.addEventListener('resize', updateScrollButtons);
+    document.getElementById('clearLocksBtn').addEventListener('click', ()=>{ selectedLocks.clear(); renderLocks(); });
+
+    refUpload.addEventListener('change', (e)=>{
+      const file = e.target.files && e.target.files[0];
+      if(file){ refName = file.name; refOn = true; toggleRefBtn.textContent = 'Reference On'; refStatus.textContent = `Reference attached: ${file.name}`; }
+    });
+
+    document.addEventListener('change', (e)=>{
+      if(!e.target || !e.target.id) return;
+      if(['cardRank','cardType','jokerStyle','numberArt','deckMode','suitTheme'].includes(e.target.id)){
+        syncDeckFoundationSelections();
+        enforceDeckSafety();
+      }
+    });
+    document.querySelector('label.mini').addEventListener('click', ()=>refUpload.click());
+    toggleRefBtn.addEventListener('click', ()=>{
+      refOn = !refOn;
+      toggleRefBtn.textContent = refOn ? 'Reference On' : 'Reference Off';
+      refStatus.textContent = refOn ? (refName ? `Reference attached: ${refName}` : 'Reference enabled. Upload an image to tie identity to the prompt.') : 'No reference image attached.';
+    });
+
+
+    document.getElementById('generateVideoBtn').addEventListener('click', generateVideoScript);
+    document.getElementById('copyVideoScriptBtn').addEventListener('click', ()=>copyElText('videoScriptOutput'));
+    document.getElementById('copyMotionOnlyBtn').addEventListener('click', ()=>copyElText('motionOnlyOutput'));
+    document.getElementById('generateMusicBtn').addEventListener('click', generateMusic);
+    document.getElementById('copyJingleBtn').addEventListener('click', ()=>copyElText('musicJingleOutput'));
+    document.getElementById('copy30Btn').addEventListener('click', ()=>copyElText('music30Output'));
+    document.getElementById('copy60Btn').addEventListener('click', ()=>copyElText('music60Output'));
+    document.getElementById('copyLyricsBtn').addEventListener('click', ()=>copyElText('musicLyricsOutput'));
+    document.getElementById('copyInstrumentalBtn').addEventListener('click', ()=>{
+      const txt = document.getElementById('musicLyricsOutput').textContent.split('\n\n').slice(-1)[0] || '';
+      navigator.clipboard.writeText(txt);
+    });
+    document.getElementById('generateMarketingBtn').addEventListener('click', generateMarketing);
+    document.getElementById('copyAllMarketingBtn').addEventListener('click', copyAllMarketing);
+
+    createMiniChips('genreChips', genreOptions, selectedGenres);
+    createMiniChips('musicStyleChips', musicStyleOptions, selectedMusicStyles);
+    syncRangeValue('weirdnessRange','weirdnessValue');
+    syncRangeValue('styleInfluenceRange','styleInfluenceValue');
+    syncRangeValue('audioInfluenceRange','audioInfluenceValue');
+    document.getElementById('musicVocalBtn').addEventListener('click', ()=>{ musicVocalOn = !musicVocalOn; document.getElementById('musicVocalBtn').classList.toggle('active', musicVocalOn); document.getElementById('musicVocalBtn').textContent = musicVocalOn ? 'Vocal On' : 'Vocal Off'; });
+    document.getElementById('musicInstrumentalBtn').addEventListener('click', ()=>{ musicInstrumentalOn = !musicInstrumentalOn; document.getElementById('musicInstrumentalBtn').classList.toggle('active', musicInstrumentalOn); document.getElementById('musicInstrumentalBtn').textContent = musicInstrumentalOn ? 'Instrumental On' : 'Instrumental Off'; });
+    createControls();
+    createLocks();
+    createPresets();
+    renderHistory();
+    loadLockedStyleFromStorage();
+    renderSavedStyles();
+    updateStyleSnapshotStatus();
+    applyPromptGlowState();
+    applyHistoryGlowState();
+    updateScrollButtons();
+    initFloating();
+  </script>
+</body>
+</html>
